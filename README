@@ -11,4 +11,6 @@ TODO list:
   * take into account the charset when crawling webpages
   * TBD grid-compliant code...
   * clean the code (debug mode, documentation, etc.)
-  * write a comprehensive post_processing.py script to keep compatibility with other developments. 
+  * write a comprehensive post_processing.py script to keep compatibility with other developments.
+  * monitoring and reporting (page retrieval problems, success, distributions, etc)
+  * modular architecture : include a better information extraction process.
