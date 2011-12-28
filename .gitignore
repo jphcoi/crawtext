@@ -1,0 +1,7 @@
+*.db
+/data
+/output
+/temp
+*.pyc
+*.csv
+
