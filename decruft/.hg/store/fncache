@@ -1,0 +1,5 @@
+data/BeautifulSoup.py.i
+data/__init__.py.i
+data/decruft.py.i
+data/page_parser.py.i
+data/url_helpers.py.i
