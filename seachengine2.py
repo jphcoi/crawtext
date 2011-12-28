@@ -190,10 +190,10 @@ def check_this_page_multi_out(package):
 	# 	chaine=chaine.decode(charset)
 	
 
-	fileout=open('temp/'+page[7:20]+'.htm','w')
+	#fileout=open('temp/'+page[7:20]+'.htm','w')
 	#print 'temp/'+page+'.htm'
-	fileout.write(page_summary)
-	fileout.close()
+	#fileout.write(page_summary)
+	#fileout.close()
 
 	print 'page: ', page,' with title: ', title,' was assessed as ',rescheck
 	if not redirected_page==None:
