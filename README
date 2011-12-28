@@ -9,6 +9,8 @@ TODO list:
   * automatically extract dates from extracted texts (good python solutions in english, still lacking in french)
   * feed the db with cleaner and richer information (like domain name, number of views, etc)
   * take into account the charset when crawling webpages
+  * crawl updating process 
+  * automatic grab google links to initiate a crawl
   * TBD grid-compliant code...
   * clean the code (debug mode, documentation, etc.)
   * write a comprehensive post_processing.py script to keep compatibility with other developments.
