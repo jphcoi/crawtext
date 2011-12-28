@@ -8,4 +8,4 @@ TODO list:
   * better scrapping of webpages, for the moment decruft is doing great but can be enhanced (http://www.minvolai.com/blog/decruft-arc90s-readability-in-python/)
   * automatically extract dates from extracted texts (good python solutions in english, still lacking in french)
   * feed the db with cleaner and richer information (like domain name, number of views, etc)
-  * take into account the charset when downloading 
+  * take into account the charset when crawling webpages
