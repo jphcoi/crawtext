@@ -18,6 +18,12 @@ warnings.filterwarnings("ignore")
 # pagelist_list=['data/alguesvertes/alguesvertes.htm','data/alguesvertes/alguesvertes2.htm','data/alguesvertes/alguesvertes3.htm','data/alguesvertes/alguesvertes4.htm','data/alguesvertes/alguesvertes5.htm']
 global pages
 pages={}
+
+try:
+	os.mkdir('data')
+except:
+	pass
+	
 path = 'data/alguesverteslight2'
 #http://www.scroogle.org/cgi-bin/scraper.htm #feed a path with links grabbed from scroogle!
 

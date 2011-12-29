@@ -33,3 +33,18 @@ def url_uniformer(url):
 	else:
 		url = 'http://' + url
 	return url
+	
+
+class webpage:
+	url=None
+	url_redirected=None
+	html=None
+	html_summary=None
+	text_summary=None
+	domain=None
+	query_result=None
+	url_feed=None
+	path=None
+	links=None
+	charset=None
+	title=None
