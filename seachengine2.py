@@ -34,11 +34,9 @@ from urlparse import urljoin
 #from pattern.web import *
 import warnings
 import chardet
-
+import time
 warnings.filterwarnings("ignore")
 
-forbidden_sites=map(lambda x: x[:-1],open('forbidden_sites.txt','r').readlines())
-print 'forbidden_sites',forbidden_sites
 
 socket.setdefaulttimeout(30)
 
@@ -55,12 +53,6 @@ user_agents = [
 	'Lynx/2.8.5rel.1 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/1.2.9'
 ]
 
-def check_forbidden(url):
-	for forbid in forbidden_sites:
-		if forbid in url:
-			print url, ' declined (fordbideen list)'
-			return True
-	return False
 
 
 # def rss_analyze(rssfeed_url):
@@ -162,9 +154,10 @@ class Webpage:
 
 def extract_data(package):
 	(page,query)=(package[0],package[1])
+	#print page
 	new_webpage=Webpage()
 	new_webpage.url=page
-	if 1:
+	try:
 		url=URL(page,method=GET)
 		domain = url.domain# u'domain.com'
 		url_feed=''
@@ -174,7 +167,16 @@ def extract_data(package):
 		# different options to open a webpage
 		html=url.download(user_agent=choice(user_agents),cached=False)
 		#html = urllib2.urlopen(page).read()
-	
+	except:
+		try:
+			print "*** Could not open page: %s" % page
+		except:
+			try:
+				html = urllib2.urlopen(page).read()
+				print "****** Saved by urllib2 library which opened page: %s" % page
+			except:
+				pass
+	try:
 		dom = web.Document(html)
 		try:
 			title = dom.by_tag('title')[0]		
@@ -235,8 +237,8 @@ def extract_data(package):
 		new_webpage.successful_open=True
 		#new_webpage.display_page()
 		#new_webpage.links=None
-	else:
-		print "*** Could not open %s" % page
+	except:
+		print "*** Could not extract data from %s" % page
 	return new_webpage
 
 def gettextonly_out(soup):
@@ -256,12 +258,13 @@ def gettextonly_out(soup):
 	else:
 	  return v.replace("'"," ").strip()
 
-def find_url(page,text,only_out=True):
+def find_url(domain,page,text,only_out=True):
 	soup=parser(text)
 	links=soup('a')
 	#print 'links',links
 	links_final=[]
-	page_root = page.replace('http://','').replace('www','').split('/')[0]	
+	print 'domain',domain
+	page_root = page.replace('http://','').replace('www','').split('/')[0]
 	for link in links:	
 		try:
 			if ('href' in dict(link.attrs)):
@@ -269,6 +272,8 @@ def find_url(page,text,only_out=True):
 				if url.find("'")!=-1: continue
 				url=url.split('#')[0]	 # remove location portion
 				if url[0:4]=='http':
+					if domain=='google.com':
+						url=url.split("&amp;")[0]
 					if only_out:
 						link_root=link['href'].replace('http://','').replace('www','').split('/')[0]
 						if link_root!=page_root:
@@ -280,17 +285,15 @@ def find_url(page,text,only_out=True):
 	return links_final
 
 	
-def extract_links(data):
-	#print 'data',data
+def extract_links(webpage):
 	#(page,html,querycheck,rssfeed_url,text,redirected_page,html_summary,domain,webpage)=data
-	webpage=data
 	link_total=[]
 	page_old=webpage.url
 	if not webpage.url_redirected==None: 
-		page.url=webpage.url_redirected
+		webpage.url=webpage.url_redirected
 	if webpage.query_result:
 		#links=unique(web.find_urls(html_summary, unique=True))
-		links=unique(find_url(webpage.url,webpage.html_summary,only_out=False))#on chercher les liens uniquement dans le contenu pertinent
+		links=unique(find_url(webpage.domain,webpage.url,webpage.html_summary,only_out=False))#on chercher les liens uniquement dans le contenu pertinent
 		for link in links:#in find_url(page,html):#web.find_urls(text, unique=True):
 			if not check_forbidden(link):
 					linkText=''
@@ -366,14 +369,15 @@ class crawler:
 		for i in range(depth):
 			above_in_links_limit_pages=[x for x in pages if pages[x]>=inlinks]
 			print i+1,'th thread - ',len(above_in_links_limit_pages),' pages to (re)check', ' over potentially ', len(pages.keys()) , ' total pages '
-			print 'above_in_links_limit_pages',above_in_links_limit_pages
+			print 'above_in_links_limit_pages',len(above_in_links_limit_pages)
 			pool_size = int(multiprocessing.cpu_count())
-			pool_size = max(1,min(10*pool_size,len(above_in_links_limit_pages)))
+			pool_size = max(1,min(30*pool_size,len(above_in_links_limit_pages)))
 			#pool_size=1#DEBUG MODE
 			pool = multiprocessing.Pool(processes=pool_size)
 			package =[]
 			for page in above_in_links_limit_pages:
 				package.append((page,query))
+			print 'package',package
 			data_extracted = []
 			r = pool.map_async(extract_data, package,callback=data_extracted.append)#check the current page against the query
 			print "thread",i+1," wait... "
@@ -382,28 +386,36 @@ class crawler:
 			if len(data_extracted)>0:
 				data_extracted=data_extracted[0]
 				print 'data_extracted length',len(data_extracted)
+				print "waiting ",int(pool_size/10)," seconds to recover..."
+				time.sleep(int(pool_size/10))
+				
 				pool = multiprocessing.Pool(processes=pool_size)
 				
 				processed_pages = pool.map(extract_links,data_extracted) #extract_links returns: (page,soup,html,link_total)
 				print 'total processed_pages = ',len(processed_pages)
 				for processed_page in processed_pages:
-					webpage=processed_page
-					redirected_page=webpage.url_redirected
+					current_webpage=processed_page
+					redirected_page=current_webpage.url_redirected
 					if not redirected_page==None and not redirected_page=='redirected_page':#in case of redirection
-						del(pages[webpage.url])	
-						webpage.url=webpage.url_redirected
-					#print 'should change status of page ', page	, ' to -999999...
-					pages[webpage.url]=-9999999999#page visited
-					if not webpage.links=='link_total':
-						pagenumber+=1
-						if pagenumber%20:
-							print pagenumber, 'th page recorded: ', page
-						self.addtoindex(webpage.url)
-						self.addtocorpus(webpage.url,webpage.html_summary,webpage.text_summary)
-						for (page,cited,linkText) in webpage.links:
-							self.addlinkref(webpage.url,cited,linkText)				
-							pages[cited]=pages.get(cited,0)+1				 				
-						self.dbcommit()
+						try:
+							del(pages[current_webpage.url])	
+						except:
+							print current_webpage.url, ' was not in global dictionnary pages...?'
+							pass
+						current_webpage.url=current_webpage.url_redirected
+					if not check_forbidden(current_webpage.url):
+						#print 'should change status of page ', page	, ' to -999999...
+						pages[current_webpage.url]=-9999999999#page visited
+						if not current_webpage.links=='link_total':
+							pagenumber+=1
+							if pagenumber%20:
+								print pagenumber, 'th page recorded: ', page
+							self.addtoindex(current_webpage.url)
+							self.addtocorpus(current_webpage.url,current_webpage.html_summary,current_webpage.text_summary)
+							for (page,cited,linkText) in current_webpage.links:
+								self.addlinkref(current_webpage.url,cited,linkText)				
+								pages[cited]=pages.get(cited,0)+1				 				
+							self.dbcommit()
 			else:
 				print 'no more websites to visit'
 				break

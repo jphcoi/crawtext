@@ -4,5 +4,16 @@ kelkoo.fr/
 '
 partner.googleadservices.com
 alvinet.com
-scroogle.org
 http://fr.wordpress.com
+&q=related:
+?q=related:
+https://webcache.googleusercontent.co
+http://webcache.googleusercontent.com
+https://accounts.google.com/ServiceLogin?
+http://www.google.com
+https://plus.google.com/
+http://t1.gstatic.com/
+http://t0.gstatic.com/
+accounts.google.com/
+http://maps.google.com
+support.google.com
