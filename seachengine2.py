@@ -364,33 +364,31 @@ class crawler:
 
 
 	def crawl(self,pages,query='',inlinks=1,depth=10):	
+		pool_size = int(multiprocessing.cpu_count())
+		pool_size= 10*pool_size
+		pool = multiprocessing.Pool(processes=pool_size)
 		#print 'pages',pages 
 		pagenumber=0
 		for i in range(depth):
 			above_in_links_limit_pages=[x for x in pages if pages[x]>=inlinks]
 			print i+1,'th thread - ',len(above_in_links_limit_pages),' pages to (re)check', ' over potentially ', len(pages.keys()) , ' total pages '
 			print 'above_in_links_limit_pages',len(above_in_links_limit_pages)
-			pool_size = int(multiprocessing.cpu_count())
-			pool_size = max(1,min(30*pool_size,len(above_in_links_limit_pages)))
+			#pool_size = int(multiprocessing.cpu_count())
+			#pool_size = max(1,min(30*pool_size,len(above_in_links_limit_pages)))
 			#pool_size=1#DEBUG MODE
-			pool = multiprocessing.Pool(processes=pool_size)
 			package =[]
 			for page in above_in_links_limit_pages:
 				package.append((page,query))
 			print 'package',package
-			data_extracted = []
-			r = pool.map_async(extract_data, package,callback=data_extracted.append)#check the current page against the query
+			#data_extracted = []
+			#r = pool.map_async(extract_data, package,callback=data_extracted.append)#check the current page against the query
+			data_extracted=pool.map(extract_data, package)
 			print "thread",i+1," wait... "
-			r.wait()
+			#r.wait()
 
 			if len(data_extracted)>0:
-				data_extracted=data_extracted[0]
+				#data_extracted=data_extracted[0]
 				print 'data_extracted length',len(data_extracted)
-				print "waiting ",int(pool_size/10)," seconds to recover..."
-				time.sleep(int(pool_size/10))
-				
-				pool = multiprocessing.Pool(processes=pool_size)
-				
 				processed_pages = pool.map(extract_links,data_extracted) #extract_links returns: (page,soup,html,link_total)
 				print 'total processed_pages = ',len(processed_pages)
 				for processed_page in processed_pages:
