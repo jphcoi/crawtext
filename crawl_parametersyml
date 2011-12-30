@@ -1,0 +1,6 @@
+{
+path: 'data/algsang',
+inlinks_min: 1,
+depth: 10,
+query: 'algues vertes AND sangliers',
+}

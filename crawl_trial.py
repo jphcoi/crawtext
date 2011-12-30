@@ -12,20 +12,36 @@ warnings.filterwarnings("ignore")
 global pages
 pages={}
 
+# try:
+# 	os.mkdir('data')
+# except:
+# 	pass
+		
+import yaml
 try:
-	os.mkdir('data')
+	user_parameters=sys.argv[1]
 except:
-	pass
+	user_parameters='crawl_parameters.yml'
+parameters = yaml.load('\n'.join(open(user_parameters,'r').readlines()))				
+
+try:
+	path = parameters['path']
+except:
+	print 'invalid parameters file'
 	
-path = 'data/algsang'
-#path = 'data/alguesverteslight'
+
+inlinks_min=parameters.get('inlinks_min',1)
+depth=parameters.get('depth',10)
+query=parameters.get('query','You really should enter a query, otherwise...')
+
+ 
+#path = 'data/algsang'
 
 #http://www.scroogle.org/cgi-bin/scraper.htm #feed a path with links grabbed from scroogle!
-
 #crawler parameters
 
-inlinks_min=1
-depth=7
+#inlinks_min=1
+#depth=7
 
 from  pattern import web
 

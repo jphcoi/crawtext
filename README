@@ -1,6 +1,6 @@
-python crawl_trial.py will launch the crawl accroding to parameters declared in crawl_trial file. The crawler uses the seed sites found in the list of files of a given repertory as well as a query that will be used to accept/refuse new webpages found during the crawling process.
+python crawl_trial.py will launch the crawl accroding to parameters declared in crawl_parameters.yml file or any yaml file declared as an argument of crawl_trial.py. The crawler uses the seed sites found in the list of files of a given repertory (path) as well as a query that will be used to validate new webpages (query) found during the crawling process. inlinks_min define the minimum number of citation a page should accumulate before being considered as a candidate to enter the corpus. depth parameter defines the number of steps of corpus extension performed from the initial corpus made of seeds webpages. 
 
-required modules: urllib2,BeautifulSoup, urlparse, sqlite3, pyparsing,urllib, random, multiprocessing,lxml,socket, decruft, feedparser, pattern,warnings, chardet
+required modules: urllib2,BeautifulSoup, urlparse, sqlite3, pyparsing,urllib, random, multiprocessing,lxml,socket, decruft, feedparser, pattern,warnings, chardet, yaml
 
 
 TODO list:
