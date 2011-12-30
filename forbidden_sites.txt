@@ -18,3 +18,6 @@ accounts.google.com/
 http://maps.google.com
 support.google.com
 ?action=illicite
+&action=illicite
+.google.com
+.gstatic.com

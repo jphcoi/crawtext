@@ -36,7 +36,7 @@ import warnings
 import chardet
 import time
 warnings.filterwarnings("ignore")
-
+import hashlib
 
 socket.setdefaulttimeout(30)
 
@@ -121,6 +121,7 @@ def check_page_against_query(html,title,query):#check actual content of the page
 			text_summary=web.plaintext(html_summary, keep=[], replace=web.blocks, linebreaks=2, indentation=False)
 		except:
 			print 'cant use generic tools to get a summary'
+			html_summary=htm
 			text_summary = str(html)
 		return check_query(query,title+'\n&&&&&&&&&&&&&\n'+text_summary),text_summary,html_summary
 	else:
@@ -149,9 +150,20 @@ class Webpage:
 	title=None
 	opened=0
 	successful_open=False
-	# def display_page(self):
-	# 	print 'page url: ','url'
-
+	md5=''
+	def display_page(self):
+		
+		#print 'page url: ',self.url
+		#print 'text_summary',self.text_summary
+		print 'html_summary',self.html_summary
+		#print 'links: ',self.links
+		#print 'path: ',self.path
+		#print 'charset: ',self.charset
+		#print 'title:',self.title
+		#print 'md5',self.md5
+		
+#		(urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),u
+		
 def extract_data(package):
 	(page,query)=(package[0],package[1])
 	#print page
@@ -235,6 +247,8 @@ def extract_data(package):
 		new_webpage.title=title
 		new_webpage.opened=new_webpage.opened+1
 		new_webpage.successful_open=True
+		new_webpage.md5=hashlib.sha224(html).hexdigest()
+		
 		#new_webpage.display_page()
 		#new_webpage.links=None
 	except:
@@ -287,7 +301,7 @@ def find_url(domain,page,text,only_out=True):
 	
 def extract_links(webpage):
 	#(page,html,querycheck,rssfeed_url,text,redirected_page,html_summary,domain,webpage)=data
-	link_total=[]
+	citations=[]
 	page_old=webpage.url
 	if not webpage.url_redirected==None: 
 		webpage.url=webpage.url_redirected
@@ -300,10 +314,10 @@ def extract_links(webpage):
 					if not link[0:4]=='http':
 						link = 'http//'+link
 					else:
-						link_total.append((webpage.url,link,linkText))
-		print 'investigating a new page ', webpage.url, ' with ', len(link_total), ' citation links'
+						citations.append(link)
+		print 'investigating a new page ', webpage.url, ' with ', len(citations), ' citation links'
 		soup=''
-		webpage.links = link_total
+		webpage.links = citations
 		#return (page_old,soup,html,link_total,text,redirected_page,domain,webpage)
 	else:
 		webpage.links='link_total'
@@ -335,15 +349,18 @@ class crawler:
 		else:
 	  		return res[0]
 
-	def addtocorpus(self,url,html,html_txt,table='urlcorpus'):
+	def addtocorpus(self,webpage,table='urlcorpus'):
 		#print 'adding to corpus '+url
-		urlid=self.getentryid('urllist','url',url)
+		urlid=self.getentryid('urllist','url',webpage.url)
 		if 1:
 	  		try:
-				self.con.execute("insert into urlcorpus(urlid,url,text) values ('%s','%s','%s')" % (urlid,unicode(url),unicode(html_txt).replace("'"," ")))
+				#self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,md5,title,domain,url_feed,links,charset) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset))
+				self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,md5,title,domain,url_feed,links,charset) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset))
+				#self.con.execute("insert into urlcorpus(urlid,html_summary) values ('%s','%s')" % (urlid,unicode(webpage.html_summary).replace("'","''")))
 			except:
-				print 'fail to execute',url
-				print "insert into urlcorpus(urlid,url,text) values ('%s','%s','%s')" % (urlid,unicode(url),unicode(html_txt))
+				print 'fail to execute',webpage.url
+				#webpage.display_page()
+				#print "insert into urlcorpus(urlid,url,text) values ('%s','%s','%s')" % (urlid,unicode(url),unicode(html_txt))
 
   # Index an individual page
 	def addtoindex(self,url,table='urllist'):
@@ -409,10 +426,10 @@ class crawler:
 							if pagenumber%20:
 								print pagenumber, 'th page recorded: ', page
 							self.addtoindex(current_webpage.url)
-							self.addtocorpus(current_webpage.url,current_webpage.html_summary,current_webpage.text_summary)
-							for (page,cited,linkText) in current_webpage.links:
-								self.addlinkref(current_webpage.url,cited,linkText)				
-								pages[cited]=pages.get(cited,0)+1				 				
+							self.addtocorpus(current_webpage)
+							for link in current_webpage.links:
+								self.addlinkref(current_webpage.url,link,'')				
+								pages[link]=pages.get(link,0)+1				 				
 							self.dbcommit()
 			else:
 				print 'no more websites to visit'
@@ -421,10 +438,12 @@ class crawler:
   # Create the database tables
 	def createindextables(self): 
 		self.con.execute('create table urllist(url text,url_redirect text ,url_views integer)')
-		self.con.execute('create table urlcorpus(urlid Integer,url text,text text)')
+		self.con.execute('create table urlcorpus(urlid Integer,url text,text_summary text,html_summary text, html text,md5 text,title text,domain text,url_feed text,links text,charset text )')
 		self.con.execute('create table link(fromid integer,toid integer)')
 		self.con.execute('create index urlidx on urllist(url)')
 		self.con.execute('create index urltoidx on link(toid)')
 		self.con.execute('create index urlfromidx on link(fromid)')
 		self.dbcommit()
+
+
 
