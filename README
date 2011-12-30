@@ -16,3 +16,4 @@ TODO list:
   * write a comprehensive post_processing.py script to keep compatibility with other developments.
   * monitoring and reporting (page retrieval problems, success, distributions, etc)
   * modular architecture : include a better information extraction process.
+  * avoid downloading n times the same content. (md5 and comparison, or url cleaning)
