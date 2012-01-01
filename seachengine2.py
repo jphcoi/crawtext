@@ -3,35 +3,22 @@
 import os, sys
 reload(sys) 
 sys.setdefaultencoding("utf-8")
-import urllib2
-from BeautifulSoup import *
-import BeautifulSoup
-from urlparse import urljoin
-from sqlite3 import *
 import sqlite3
-#import nn
 from pyparsing import *
-import urllib
-#import html2text
 from random import choice
 from library import *
-#import html2text2
 import multiprocessing
-#mynet=nn.searchnet('nn.db')
 import socket
 from lxml import html
 from lxml.html.clean import clean_html
 sys.path.append("decruft")
-#from decruft import Document
 import decruft
 import urllib2
 import feedparser
+import pattern
 from  pattern import web
-from  pattern.web import *
-
 from BeautifulSoup import BeautifulSoup as parser
 from urlparse import urljoin
-#from pattern.web import *
 import warnings
 import chardet
 import time
@@ -41,9 +28,6 @@ import hashlib
 socket.setdefaulttimeout(30)
 
 
-headers = { 'User-Agent' : 'Mozilla/5.0' }
-headers = { 'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2' }
-#Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2
 user_agents = [
 	'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
 	'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -170,7 +154,7 @@ def extract_data(package):
 	new_webpage=Webpage()
 	new_webpage.url=page
 	try:
-		url=URL(page,method=GET)
+		url=web.URL(page)
 		domain = url.domain# u'domain.com'
 		url_feed=''
 		redirected_page=url.redirect# Actual URL after redirection, or None.		
@@ -247,7 +231,7 @@ def extract_data(package):
 		new_webpage.title=title
 		new_webpage.opened=new_webpage.opened+1
 		new_webpage.successful_open=True
-		new_webpage.md5=hashlib.sha224(html).hexdigest()
+		new_webpage.md5=hashlib.sha224(text_summary).hexdigest()
 		
 		#new_webpage.display_page()
 		#new_webpage.links=None
@@ -255,29 +239,27 @@ def extract_data(package):
 		print "*** Could not extract data from %s" % page
 	return new_webpage
 
-def gettextonly_out(soup):
-	v=soup.string
-	#print 'v',v
-	if v==Null:	  
-	  c=soup.contents
 
-	  resulttext=''
-	  for t in c:
-		subtext=gettextonly_out(t)
-		try:
-		  resulttext+=subtext.replace("'"," ")+'\n'
-		except:
-		  resulttext+=subtext+'\n'
-	  return resulttext
-	else:
-	  return v.replace("'"," ").strip()
+
+# Extract the text from an HTML page (no tags)
+def gettextonly(soup):
+    v=soup.string
+    if v==None:
+        c=soup.contents
+        resulttext=''
+        for t in c:
+          subtext=gettextonly(t)
+          resulttext+=subtext+'\n'
+        return resulttext
+    else:
+        return v.strip()
 
 def find_url(domain,page,text,only_out=True):
 	soup=parser(text)
 	links=soup('a')
 	#print 'links',links
 	links_final=[]
-	print 'domain',domain
+	#print 'domain',domain
 	page_root = page.replace('http://','').replace('www','').split('/')[0]
 	for link in links:	
 		try:
@@ -286,14 +268,13 @@ def find_url(domain,page,text,only_out=True):
 				if url.find("'")!=-1: continue
 				url=url.split('#')[0]	 # remove location portion
 				if url[0:4]=='http':
-					if domain=='google.com':
-						url=url.split("&amp;")[0]
+					linkText=gettextonly(link)
 					if only_out:
 						link_root=link['href'].replace('http://','').replace('www','').split('/')[0]
 						if link_root!=page_root:
-							links_final.append(url)
+							links_final.append((url_uniformer(url),linkText))
 					else:
-						links_final.append(url)
+						links_final.append((url_uniformer(url),linkText))
 		except:
 			pass
 	return links_final
@@ -302,22 +283,24 @@ def find_url(domain,page,text,only_out=True):
 def extract_links(webpage):
 	#(page,html,querycheck,rssfeed_url,text,redirected_page,html_summary,domain,webpage)=data
 	citations=[]
+	linktxtfile=open('linktext','a')
 	page_old=webpage.url
 	if not webpage.url_redirected==None: 
 		webpage.url=webpage.url_redirected
 	if webpage.query_result:
 		#links=unique(web.find_urls(html_summary, unique=True))
 		links=unique(find_url(webpage.domain,webpage.url,webpage.html_summary,only_out=False))#on chercher les liens uniquement dans le contenu pertinent
-		for link in links:#in find_url(page,html):#web.find_urls(text, unique=True):
-			if not check_forbidden(link):
-					linkText=''
+		for linke in links:#in find_url(page,html):#web.find_urls(text, unique=True):
+			if not check_forbidden(linke):
+					link,linkText=linke
+					linktxtfile.write(linkText+'\n')
 					if not link[0:4]=='http':
 						link = 'http//'+link
 					else:
 						citations.append(link)
 		print 'investigating a new page ', webpage.url, ' with ', len(citations), ' citation links'
 		soup=''
-		webpage.links = citations
+		webpage.links = citations[:5]
 		#return (page_old,soup,html,link_total,text,redirected_page,domain,webpage)
 	else:
 		webpage.links='link_total'
@@ -396,15 +379,9 @@ class crawler:
 			package =[]
 			for page in above_in_links_limit_pages:
 				package.append((page,query))
-			print 'package',package
-			#data_extracted = []
-			#r = pool.map_async(extract_data, package,callback=data_extracted.append)#check the current page against the query
+			#print 'package',package
 			data_extracted=pool.map(extract_data, package)
-			print "thread",i+1," wait... "
-			#r.wait()
-
 			if len(data_extracted)>0:
-				#data_extracted=data_extracted[0]
 				print 'data_extracted length',len(data_extracted)
 				processed_pages = pool.map(extract_links,data_extracted) #extract_links returns: (page,soup,html,link_total)
 				print 'total processed_pages = ',len(processed_pages)
@@ -418,19 +395,18 @@ class crawler:
 							print current_webpage.url, ' was not in global dictionnary pages...?'
 							pass
 						current_webpage.url=current_webpage.url_redirected
-					if not check_forbidden(current_webpage.url):
-						#print 'should change status of page ', page	, ' to -999999...
-						pages[current_webpage.url]=-9999999999#page visited
-						if not current_webpage.links=='link_total':
-							pagenumber+=1
-							if pagenumber%20:
-								print pagenumber, 'th page recorded: ', page
-							self.addtoindex(current_webpage.url)
-							self.addtocorpus(current_webpage)
-							for link in current_webpage.links:
-								self.addlinkref(current_webpage.url,link,'')				
-								pages[link]=pages.get(link,0)+1				 				
-							self.dbcommit()
+					#print 'should change status of page ', page	, ' to -999999...
+					pages[current_webpage.url]=-9999999999#page visited
+					if not current_webpage.links=='link_total':
+						pagenumber+=1
+						if pagenumber%20:
+							print pagenumber, 'th page recorded: ', page
+						self.addtoindex(current_webpage.url)
+						self.addtocorpus(current_webpage)
+						for link in current_webpage.links:
+							self.addlinkref(current_webpage.url,link,'')				
+							pages[link]=pages.get(link,0)+1				 				
+						self.dbcommit()
 			else:
 				print 'no more websites to visit'
 				break

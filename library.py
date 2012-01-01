@@ -12,11 +12,18 @@ import os
 
 forbidden_sites=map(lambda x: x[:-1],open('forbidden_sites.txt','r').readlines())
 print 'forbidden_sites',forbidden_sites
+forbidden_linktext=map(lambda x: x[:-1],open('forbidden_linktext.txt','r').readlines())
+print 'forbidden_linktext',forbidden_linktext
 
-def check_forbidden(url):
+def check_forbidden(urle):
+	(url,urltxt)=urle
 	for forbid in forbidden_sites:
 		if forbid in url:
 			print url, ' declined (fordbideen list)'
+			return True
+	for forbidtxt in forbidden_linktext:
+		if forbidtxt==urltxt.lower():
+			print urltxt, ' declined (fordbideentxt list)'
 			return True
 	return False
 
@@ -32,6 +39,7 @@ def url_uniformer(url):
 		pass
 	else:
 		url = 'http://' + url
+	url = url.split('#')[0]#get rid of js parameters
 	return url
 	
 

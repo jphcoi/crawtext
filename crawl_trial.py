@@ -6,6 +6,7 @@ sys.setdefaultencoding("utf-8")
 import seachengine2
 import warnings
 from library import *
+from  pattern import web
 
 warnings.filterwarnings("ignore")
 
@@ -34,16 +35,12 @@ inlinks_min=parameters.get('inlinks_min',1)
 depth=parameters.get('depth',10)
 query=parameters.get('query','You really should enter a query, otherwise...')
 
+#crawler parameters
  
 #path = 'data/algsang'
-
-#http://www.scroogle.org/cgi-bin/scraper.htm #feed a path with links grabbed from scroogle!
-#crawler parameters
-
 #inlinks_min=1
 #depth=7
 
-from  pattern import web
 
 dirList=os.listdir(path)
 for fname in dirList:
@@ -55,7 +52,7 @@ for fname in dirList:
 	if 'Google Search' in pagelist:
 		 new_urls = map(lambda x:x.split("&amp;")[0],new_urls)
 	for new_url in new_urls[:]:
-		if not check_forbidden(new_url) and not new_url in pages:
+		if not check_forbidden((new_url,'')) and not new_url in pages:
 			pages[new_url]=inlinks_min
 
 print 'pages init',len(pages)
@@ -64,8 +61,11 @@ query='algues vertes AND sangliers'
 #query='biofuel'
 try:
 	os.mkdir('ouput')
+	os.remove('ouput/'+query+'_crawl.db')
+	print 'deleted','ouput/'+query+'_crawl.db'
 except:
 	pass
+	
 crawler=seachengine2.crawler('ouput/'+query+'_crawl.db')
 try:
   crawler.createindextables()
