@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore")
 
 global pages
 pages={}
-
+global pattern_date_fr
 # try:
 # 	os.mkdir('data')
 # except:

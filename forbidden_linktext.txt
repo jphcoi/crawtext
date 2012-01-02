@@ -1,17 +1,19 @@
-partager
-ajoutez aux favoris
-e-mail
-imprimer
-créer une alerte
-ecrire un commentaire
-écrire un commentaire
-voir le commentaire
-voir les 0 commentaires
-voir les 1 commentaires
-voir les 2 commentaires
-voir le commentaire
-signaler un abus
-lancer la radio
-retour à l'acceuil
-suivant
-précédent
+^partage(r|z)$
+^ajoute(r|z) aux favoris$
+^e-mail$
+^imprime(r|z)$
+^crée(r|z) une ale(r|z)te$
+^ecrire un commentaire$
+^écrire un commentaire$
+^(voir|affiche(r|z)) le commentaire$
+^(voir|affiche(r|z)) les \d+ commentaires$
+^(voir|affiche(r|z)) les \d+ commentaire(s)$
+^signale(r|z) un abus$
+^signale(r|z) un contenu illicite$
+^lance(r|z) la radio$
+^suivant$
+^suivant:$
+^suivant :$
+^précédent$
+^précédent:$
+^précédent :$

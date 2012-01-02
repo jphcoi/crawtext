@@ -22,10 +22,12 @@ from urlparse import urljoin
 import warnings
 import chardet
 import time
+import re
 warnings.filterwarnings("ignore")
 import hashlib
 
 socket.setdefaulttimeout(30)
+pattern_date_fr = re.compile(r'(\d|\d\d)\s(Janvier|Février|Mars|Avril|Mai|Juin|Juillet|Août|Septembre|Octobre|Novembre|Décembre)\s(\d{4})',re.I)
 
 
 user_agents = [
@@ -135,6 +137,7 @@ class Webpage:
 	opened=0
 	successful_open=False
 	md5=''
+	date=''
 	def display_page(self):
 		
 		#print 'page url: ',self.url
@@ -180,6 +183,8 @@ def extract_data(package):
 		except:
 			title=''
 		
+		
+		
 		#two methods for charset detection:
 		charset=None
 		# option to detect page encoding from dom structure => does not seem to work utf-8 systematically retrieved...???
@@ -199,8 +204,6 @@ def extract_data(package):
 		# 	html=html.decode(charset)
 
 		query_result,text_summary,html_summary=check_page_against_query(html,title,query)
-
-	
 		# charset guess can be used to decode results
 		# if charset==None:
 		# 	encoding = chardet.detect(html)
@@ -216,8 +219,44 @@ def extract_data(package):
 		#fileout.close()
 
 		print 'page: ', page,' with title: ', title,' was assessed as ',query_result
+		#if query_result:
+			# dom = web.Document(html_summary)
+			# try:
+			# 	date = dom.by_tag('date')[0]		
+			# 	date = repr(plaintext(date.content))
+			# except:
+			# 	date=''
+			# print '######date',date
+		dateregexp=re.compile(r'(\d{4})-(\d{2})-(\d{2})')
+
+		date=''
 		if not redirected_page==None:
 			print 'plus redirection: ',redirected_page
+			try:
+				date = dateregexp.search(redirected_page).groups()
+			except:
+				pass
+		else:
+			try:
+				date = dateregexp.search(page).groups()
+			except:
+				pass
+		print '#############date',date
+		
+		#pattern = re.findall(r'(?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d\d,\s\d{4}', text)
+		print 'text_summary first 100',text_summary[:100]
+		#text_summary="Samedi 6 août 2011606/08/Août/201120:29"
+		date_txt=pattern_date_fr.search(str(text_summary[:100]))
+		
+		print 'date_txt',date_txt
+		if date_txt==None:
+			date_txt=''
+		else:
+			date_txt=date_txt.groups()
+		#date_txt=pattern_date_fr.search("Samedi 6 août 2011606/08/Août/201120:29")
+		
+		print 'date_txt'
+		print 'date_txt:',str(date_txt)
 		#feed webpage details with informations
 		new_webpage.url_redirected=redirected_page
 		new_webpage.html=html
