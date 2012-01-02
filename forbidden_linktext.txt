@@ -17,3 +17,26 @@
 ^précédent$
 ^précédent:$
 ^précédent :$
+^RSS 2.0$
+^laisse(r|z) un commentaire$
+^faire un trackback$
+^\d+ commentaire$
+^\d+ commentaires$
+^\d+ commentaire\(s\)$
+^Envoyer à un ami$
+^Haut de page$
+^Accueil$
+^Pas de commentaire$
+^del.icio.us$
+^Digg$
+^Facebook$
+^Envoyer cet article par mail$
+^Imprimer cet article$
+^Suivant :$
+^Commentaires$
+^Récents$
+^Tags$
+^Voir la vidéo
+^Trackbacks
+^Commentaires
+signaler un contenu illicite

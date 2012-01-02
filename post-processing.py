@@ -12,7 +12,7 @@ res=cur.fetchall()
 print res
 pages = {}
 for result in res:
-	#pages[result[0]]=result[1].replace(',','_')[11:55]
+	#pages[result[0]]=result[1].replace(',','_')[10:70]
 	pages[result[0]]='/'.join(result[1].replace('http://','').split('/')[:1]).replace("www.",'')
 print pages
 def unique(list):
@@ -26,7 +26,7 @@ print (len(pages)), ' web pages '
 print (len(unique(pages.values()))), ' unique sites '
 cur=con.execute("select fromid,toid from link ")
 links=cur.fetchall()
-output = open('net.csv','w')
+output = open('ouput/net.csv','w')
 num_links=0
 
 #for page in pages:
@@ -38,7 +38,7 @@ for link in links:
 		chaine=pages[fromid]+'\t'+pages[toid]
 		if not chaine in link_list:
 			link_list.append(chaine)
-		if  not 'alvinet' in chaine and not 'cle.wn.com' in chaine:
+		if  1:# not 'alvinet' in chaine and not 'cle.wn.com' in chaine:
 			output.write(chaine+'\n')
 			num_links+=1
 print num_links,'total links'

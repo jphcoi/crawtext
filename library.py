@@ -37,9 +37,9 @@ regexp_forbiden_txt=re.compile(forbiden_txt)
 
 
 pattern = re.compile(r'(\d|\d\d)\s(Janvier|Février|Mars|Avril|Mai|Juin|Juillet|Août|Septembre|Octobre|Novembre|Décembre)\s(\d{4})',re.I)
-print pattern.search("samedi 15 Janvier 2006sdqklm")
-print pattern.search("samedi 15 août 2006sdqklm")
-print pattern.search("samedi 15 août 2006 sdqklm").groups()
+# print pattern.search("samedi 15 Janvier 2006sdqklm")
+# print pattern.search("samedi 15 août 2006sdqklm")
+# print pattern.search("samedi 15 août 2006 sdqklm").groups()
 def check_forbidden(urle):
 	(url,urltxt)=urle
 	

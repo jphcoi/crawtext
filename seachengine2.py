@@ -138,6 +138,7 @@ class Webpage:
 	successful_open=False
 	md5=''
 	date=''
+	url_redirected=None
 	def display_page(self):
 		
 		#print 'page url: ',self.url
@@ -162,7 +163,6 @@ def extract_data(package):
 		url_feed=''
 		redirected_page=url.redirect# Actual URL after redirection, or None.		
 		path= url.path# [u'path']
-
 		# different options to open a webpage
 		html=url.download(user_agent=choice(user_agents),cached=False)
 		#html = urllib2.urlopen(page).read()
@@ -179,7 +179,7 @@ def extract_data(package):
 		dom = web.Document(html)
 		try:
 			title = dom.by_tag('title')[0]		
-			title = repr(plaintext(title.content))
+			title = repr(web.plaintext(title.content))
 		except:
 			title=''
 		
@@ -218,7 +218,6 @@ def extract_data(package):
 		#fileout.write(html_summary)
 		#fileout.close()
 
-		print 'page: ', page,' with title: ', title,' was assessed as ',query_result
 		#if query_result:
 			# dom = web.Document(html_summary)
 			# try:
@@ -227,36 +226,35 @@ def extract_data(package):
 			# except:
 			# 	date=''
 			# print '######date',date
-		dateregexp=re.compile(r'(\d{4})-(\d{2})-(\d{2})')
+		dateregexp=re.compile(r'(\d{4})-|\\(\d{2})-|\\(\d{2})')
 
 		date=''
 		if not redirected_page==None:
 			print 'plus redirection: ',redirected_page
 			try:
 				date = dateregexp.search(redirected_page).groups()
+				new_webpage.date='-'.join(date)
 			except:
 				pass
 		else:
 			try:
 				date = dateregexp.search(page).groups()
+				new_webpage.date='-'.join(date)
 			except:
 				pass
-		print '#############date',date
+		#print '#############date',date
+			
 		
-		#pattern = re.findall(r'(?:January|February|March|April|May|June|July|August|September|October|November|December)\s\d\d,\s\d{4}', text)
-		print 'text_summary first 100',text_summary[:100]
-		#text_summary="Samedi 6 août 2011606/08/Août/201120:29"
-		date_txt=pattern_date_fr.search(str(text_summary[:100]))
-		
-		print 'date_txt',date_txt
-		if date_txt==None:
-			date_txt=''
-		else:
-			date_txt=date_txt.groups()
+		if date=='':
+			date_txt=pattern_date_fr.search(str(text_summary))		
+			if not date_txt==None:
+				date=date_txt.groups()
+				new_webpage.date='-'.join(date)
 		#date_txt=pattern_date_fr.search("Samedi 6 août 2011606/08/Août/201120:29")
+		print 'page: ', new_webpage.url,' with title: ', title,' and date',new_webpage.date ,'was assessed as ',query_result
 		
-		print 'date_txt'
-		print 'date_txt:',str(date_txt)
+		#print 'date_txt'
+		#print 'date_txt:',str(date_txt)
 		#feed webpage details with informations
 		new_webpage.url_redirected=redirected_page
 		new_webpage.html=html
@@ -377,7 +375,7 @@ class crawler:
 		if 1:
 	  		try:
 				#self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,md5,title,domain,url_feed,links,charset) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset))
-				self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,md5,title,domain,url_feed,links,charset) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset))
+				self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,md5,title,domain,url_feed,links,charset,date) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset,webpage.date))
 				#self.con.execute("insert into urlcorpus(urlid,html_summary) values ('%s','%s')" % (urlid,unicode(webpage.html_summary).replace("'","''")))
 			except:
 				print 'fail to execute',webpage.url
@@ -403,14 +401,21 @@ class crawler:
 
 
 	def crawl(self,pages,query='',inlinks=1,depth=10):	
+		
+		equivalent={}
 		pool_size = int(multiprocessing.cpu_count())
 		pool_size= 10*pool_size
 		pool = multiprocessing.Pool(processes=pool_size)
 		#print 'pages',pages 
 		pagenumber=0
 		for i in range(depth):
+			pages_clean = {}
+			for page,views in pages.iteritems():
+				pages_clean[equivalent.get(page,page)]=views
+			pages=pages_clean
+			
 			above_in_links_limit_pages=[x for x in pages if pages[x]>=inlinks]
-			print i+1,'th thread - ',len(above_in_links_limit_pages),' pages to (re)check', ' over potentially ', len(pages.keys()) , ' total pages '
+			print '\n\n\n*****************************\n\n\n',i+1,'th thread - ',len(above_in_links_limit_pages),' pages to (re)check', ' over potentially ', len(pages.keys()) , ' total pages\n\n\n*****************************\n\n\n',
 			print 'above_in_links_limit_pages',len(above_in_links_limit_pages)
 			#pool_size = int(multiprocessing.cpu_count())
 			#pool_size = max(1,min(30*pool_size,len(above_in_links_limit_pages)))
@@ -421,29 +426,24 @@ class crawler:
 			#print 'package',package
 			data_extracted=pool.map(extract_data, package)
 			if len(data_extracted)>0:
+				for webpage in data_extracted:
+					pages[webpage.url]=-9999999999#page visited even if there is a redirection...
+					if not webpage.url_redirected==None:
+						equivalent[webpage.url]=webpage.url_redirected
 				print 'data_extracted length',len(data_extracted)
 				processed_pages = pool.map(extract_links,data_extracted) #extract_links returns: (page,soup,html,link_total)
 				print 'total processed_pages = ',len(processed_pages)
 				for processed_page in processed_pages:
 					current_webpage=processed_page
-					redirected_page=current_webpage.url_redirected
-					if not redirected_page==None and not redirected_page=='redirected_page':#in case of redirection
-						try:
-							del(pages[current_webpage.url])	
-						except:
-							print current_webpage.url, ' was not in global dictionnary pages...?'
-							pass
-						current_webpage.url=current_webpage.url_redirected
-					#print 'should change status of page ', page	, ' to -999999...
 					pages[current_webpage.url]=-9999999999#page visited
 					if not current_webpage.links=='link_total':
 						pagenumber+=1
-						if pagenumber%20:
-							print pagenumber, 'th page recorded: ', page
+						#if pagenumber%20==0:
+						print pagenumber, 'th page recorded: ', current_webpage.url
 						self.addtoindex(current_webpage.url)
 						self.addtocorpus(current_webpage)
 						for link in current_webpage.links:
-							self.addlinkref(current_webpage.url,link,'')				
+							self.addlinkref(current_webpage.url,equivalent.get(link,link),'')				
 							pages[link]=pages.get(link,0)+1				 				
 						self.dbcommit()
 			else:
@@ -453,7 +453,7 @@ class crawler:
   # Create the database tables
 	def createindextables(self): 
 		self.con.execute('create table urllist(url text,url_redirect text ,url_views integer)')
-		self.con.execute('create table urlcorpus(urlid Integer,url text,text_summary text,html_summary text, html text,md5 text,title text,domain text,url_feed text,links text,charset text )')
+		self.con.execute('create table urlcorpus(urlid Integer,url text,text_summary text,html_summary text, html text,md5 text,title text,domain text,url_feed text,links text,charset text,date text )')
 		self.con.execute('create table link(fromid integer,toid integer)')
 		self.con.execute('create index urlidx on urllist(url)')
 		self.con.execute('create index urltoidx on link(toid)')
