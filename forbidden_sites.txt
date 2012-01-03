@@ -3,7 +3,8 @@ twitter.com/
 kelkoo.fr/
 partner.googleadservices.com
 alvinet.com
-google.com/
+google.com
+google.fr
 http://fr.wordpress.com
 googleusercontent.com
 accounts.google.com
@@ -13,3 +14,6 @@ http://t0.gstatic.com/
 maps.google.com
 support.google.com
 gstatic.com
+.mp3$
+.mp4$
+.ogg$

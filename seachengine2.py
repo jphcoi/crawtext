@@ -101,7 +101,7 @@ def check_query(query,text):
 
 
 def check_page_against_query(html,title,query):#check actual content of the page against the query
-	if check_query(query,str(html)):
+	if 1:#check_query(query,str(html)):
 		try:
 			html_summary=decruft.Document(html).summary()
 			text_summary=web.plaintext(html_summary, keep=[], replace=web.blocks, linebreaks=2, indentation=False)
@@ -139,6 +139,8 @@ class Webpage:
 	md5=''
 	date=''
 	url_redirected=None
+	mimetype=None
+	links_whole=None
 	def display_page(self):
 		
 		#print 'page url: ',self.url
@@ -153,125 +155,133 @@ class Webpage:
 #		(urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),u
 		
 def extract_data(package):
-	(page,query)=(package[0],package[1])
+	(page,query)=package
+	
 	#print page
 	new_webpage=Webpage()
 	new_webpage.url=page
 	try:
 		url=web.URL(page)
-		domain = url.domain# u'domain.com'
-		url_feed=''
-		redirected_page=url.redirect# Actual URL after redirection, or None.		
-		path= url.path# [u'path']
-		# different options to open a webpage
-		html=url.download(user_agent=choice(user_agents),cached=False)
-		#html = urllib2.urlopen(page).read()
-	except:
-		try:
-			print "*** Could not open page: %s" % page
-		except:
-			try:
-				html = urllib2.urlopen(page).read()
-				print "****** Saved by urllib2 library which opened page: %s" % page
-			except:
-				pass
-	try:
-		dom = web.Document(html)
-		try:
-			title = dom.by_tag('title')[0]		
-			title = repr(web.plaintext(title.content))
-		except:
-			title=''
-		
-		
-		
-		#two methods for charset detection:
-		charset=None
-		# option to detect page encoding from dom structure => does not seem to work utf-8 systematically retrieved...???
-		# try:
-		# 	metas=dom.by_tag('meta')
-		# 	charset=looking4charset(metas)
-		# 	print 'charset',charset, 'in page',page
-		# except:
-		# 	charset=None
-		#
-		
-		# chardet library use
-		# if charset==None: 
-		# 	encoding = chardet.detect(html)
-		# 	html=html.decode(encoding['encoding'])
-		# else:
-		# 	html=html.decode(charset)
-
-		query_result,text_summary,html_summary=check_page_against_query(html,title,query)
-		# charset guess can be used to decode results
-		# if charset==None:
-		# 	encoding = chardet.detect(html)
-		# 	html=html.decode(encoding['encoding'])
-		# else:
-		# 	html=html.decode(charset)
-
-
-		#save in a repertory output textual summaries
-		#fileout=open('temp/'+page[7:20]+'.htm','w')
-		#print 'temp/'+page+'.htm'
-		#fileout.write(html_summary)
-		#fileout.close()
-
-		#if query_result:
-			# dom = web.Document(html_summary)
-			# try:
-			# 	date = dom.by_tag('date')[0]		
-			# 	date = repr(plaintext(date.content))
-			# except:
-			# 	date=''
-			# print '######date',date
-		dateregexp=re.compile(r'(\d{4})-|\\(\d{2})-|\\(\d{2})')
-
-		date=''
-		if not redirected_page==None:
-			print 'plus redirection: ',redirected_page
-			try:
-				date = dateregexp.search(redirected_page).groups()
-				new_webpage.date='-'.join(date)
-			except:
-				pass
+		mimetype=url.mimetype
+		new_webpage.mimetype=mimetype
+		if mimetype=='text/html':#only load Webpages!!!
+			domain = url.domain# u'domain.com'
+			url_feed=''
+			redirected_page=url.redirect# Actual URL after redirection, or None.		
+			path= url.path# [u'path']
+			# different options to open a webpage
+			html=url.download(user_agent=choice(user_agents),cached=False)
+			#html = urllib2.urlopen(page).read()
 		else:
+			print 'bad mimetype',mimetype,page
+			new_webpage.successful_open=True
+	except:
+		print "*** Could not open page: %s" % page
+		new_webpage.successful_open=False
+	try:
+		if check_query(query,str(html)):#on s'assure d'abord que ça roule pour le full html
+			new_webpage.successful_open=True
+			
+			dom = web.Document(html)
 			try:
-				date = dateregexp.search(page).groups()
-				new_webpage.date='-'.join(date)
+				title = dom.by_tag('title')[0]		
+				title = repr(web.plaintext(title.content))
 			except:
-				pass
-		#print '#############date',date
+				title=''
+		
+		
+		
+			#two methods for charset detection:
+			charset=None
+			# option to detect page encoding from dom structure => does not seem to work utf-8 systematically retrieved...???
+			# try:
+			# 	metas=dom.by_tag('meta')
+			# 	charset=looking4charset(metas)
+			# 	print 'charset',charset, 'in page',page
+			# except:
+			# 	charset=None
+			#
+		
+			# chardet library use
+			# if charset==None: 
+			# 	encoding = chardet.detect(html)
+			# 	html=html.decode(encoding['encoding'])
+			# else:
+			# 	html=html.decode(charset)
+
+			query_result,text_summary,html_summary=check_page_against_query(html,title,query)
+			# charset guess can be used to decode results
+			# if charset==None:
+			# 	encoding = chardet.detect(html)
+			# 	html=html.decode(encoding['encoding'])
+			# else:
+			# 	html=html.decode(charset)
+
+
+			#save in a repertory output textual summaries
+			#fileout=open('temp/'+page[7:20]+'.htm','w')
+			#print 'temp/'+page+'.htm'
+			#fileout.write(html_summary)
+			#fileout.close()
+
+			#if query_result:
+				# dom = web.Document(html_summary)
+				# try:
+				# 	date = dom.by_tag('date')[0]		
+				# 	date = repr(plaintext(date.content))
+				# except:
+				# 	date=''
+				# print '######date',date
+			dateregexp=re.compile(r'(\d{4})-|\\(\d{2})-|\\(\d{2})')
+
+			date=''
+			if not redirected_page==None:
+				print 'plus redirection: ',redirected_page
+				try:
+					date = dateregexp.search(redirected_page).groups()
+					new_webpage.date='-'.join(date)
+				except:
+					pass
+			else:
+				try:
+					date = dateregexp.search(page).groups()
+					new_webpage.date='-'.join(date)
+				except:
+					pass
+			#print '#############date',date
 			
 		
-		if date=='':
-			date_txt=pattern_date_fr.search(str(text_summary))		
-			if not date_txt==None:
-				date=date_txt.groups()
-				new_webpage.date='-'.join(date)
-		#date_txt=pattern_date_fr.search("Samedi 6 août 2011606/08/Août/201120:29")
-		print 'page: ', new_webpage.url,' with title: ', title,' and date',new_webpage.date ,'was assessed as ',query_result
+			if date=='':
+				date_txt=pattern_date_fr.search(str(text_summary))		
+				if not date_txt==None:
+					date=date_txt.groups()
+					new_webpage.date='-'.join(date)
+			#date_txt=pattern_date_fr.search("Samedi 6 août 2011606/08/Août/201120:29")
+			if query_result:
+				print 'page: ', new_webpage.url,' with title: ', title,' and date',new_webpage.date ,'was assessed as ',query_result
 		
-		#print 'date_txt'
-		#print 'date_txt:',str(date_txt)
-		#feed webpage details with informations
-		new_webpage.url_redirected=redirected_page
-		new_webpage.html=html
-		new_webpage.html_summary=html_summary
-		new_webpage.text_summary=text_summary
-		new_webpage.domain=domain
-		new_webpage.query_result=query_result
-		new_webpage.url_feed=url_feed
-		new_webpage.path=path
-		new_webpage.charset=charset
-		new_webpage.title=title
-		new_webpage.opened=new_webpage.opened+1
-		new_webpage.successful_open=True
-		new_webpage.md5=hashlib.sha224(text_summary).hexdigest()
+			#print 'date_txt'
+			#print 'date_txt:',str(date_txt)
+			#feed webpage details with informations
+			new_webpage.url_redirected=redirected_page
+			new_webpage.html=html
+			new_webpage.html_summary=html_summary
+			new_webpage.text_summary=text_summary
+			new_webpage.domain=domain
+			new_webpage.query_result=query_result
+			new_webpage.url_feed=url_feed
+			new_webpage.path=path
+			new_webpage.charset=charset
+			new_webpage.title=title
+			new_webpage.opened=new_webpage.opened+1
+			new_webpage.md5=hashlib.sha224(text_summary).hexdigest()
 		
-		#new_webpage.display_page()
-		#new_webpage.links=None
+			#new_webpage.display_page()
+			#new_webpage.links=None
+		else:
+			#the query is not even in the raw html
+			new_webpage.successful_open=True
+			new_webpage.query_result=False
 	except:
 		print "*** Could not extract data from %s" % page
 	return new_webpage
@@ -320,6 +330,7 @@ def find_url(domain,page,text,only_out=True):
 def extract_links(webpage):
 	#(page,html,querycheck,rssfeed_url,text,redirected_page,html_summary,domain,webpage)=data
 	citations=[]
+	citations_whole=[]
 	linktxtfile=open('linktext','a')
 	page_old=webpage.url
 	if not webpage.url_redirected==None: 
@@ -327,6 +338,7 @@ def extract_links(webpage):
 	if webpage.query_result:
 		#links=unique(web.find_urls(html_summary, unique=True))
 		links=unique(find_url(webpage.domain,webpage.url,webpage.html_summary,only_out=False))#on chercher les liens uniquement dans le contenu pertinent
+		links_whole=unique(find_url(webpage.domain,webpage.url,webpage.html,only_out=False))#on chercher les liens uniquement dans le contenu pertinent
 		for linke in links:#in find_url(page,html):#web.find_urls(text, unique=True):
 			if not check_forbidden(linke):
 					link,linkText=linke
@@ -335,16 +347,39 @@ def extract_links(webpage):
 						link = 'http//'+link
 					else:
 						citations.append(link)
+		for linke in links_whole:#in find_url(page,html):#web.find_urls(text, unique=True):
+			if not check_forbidden(linke):
+					link,linkText=linke
+					linktxtfile.write(linkText+'\n')
+					if not link[0:4]=='http':
+						link = 'http//'+link
+					else:
+						citations_whole.append(link)
+
+
 		print 'investigating a new page ', webpage.url, ' with ', len(citations), ' citation links'
 		soup=''
-		webpage.links = citations[:5]
+		webpage.links = citations[:]
+		webpage.links_whole = citations_whole[:]
 		#return (page_old,soup,html,link_total,text,redirected_page,domain,webpage)
 	else:
 		webpage.links='link_total'
+		webpage.links_whole='link_total'
 		#return (page_old,'soup','html','link_total','text',redirected_page,domain,webpage)
 	return webpage
 	
+def reinit_pool():
+	try:
+		pool.close()
+	except:
+		pass
+	pool_size = int(multiprocessing.cpu_count())
+	pool_size= 5*pool_size
+	pool = multiprocessing.Pool(processes=pool_size)
+	return pool,pool_size
 
+
+	
 class crawler:
 	
   # Initialize the crawler with the name of database
@@ -400,61 +435,90 @@ class crawler:
 		linkid=cur.lastrowid
 
 
+	def addlinkref_whole(self,urlFrom,urlTo,linkText):
+		fromid=self.getentryid('urllist','url',urlFrom)
+		toid=self.getentryid('urllist','url',urlTo)
+		if fromid==toid: return
+		cur=self.con.execute("insert into link_whole(fromid,toid) values (%d,%d)" % (fromid,toid))
+		linkid=cur.lastrowid
+
+
 	def crawl(self,pages,query='',inlinks=1,depth=10):	
 		
 		equivalent={}
-		pool_size = int(multiprocessing.cpu_count())
-		pool_size= 10*pool_size
-		pool = multiprocessing.Pool(processes=pool_size)
+		
 		#print 'pages',pages 
 		pagenumber=0
 		for i in range(depth):
+			
 			pages_clean = {}
 			for page,views in pages.iteritems():
 				pages_clean[equivalent.get(page,page)]=views
 			pages=pages_clean
 			
-			above_in_links_limit_pages=[x for x in pages if pages[x]>=inlinks]
+			above_in_links_limit_pages=[x for x in pages if pages[x]>=inlinks and pages[x]<=50000]#on essaye de rouvrir la page 5 fois avant d'abandonner 
+			N=len(above_in_links_limit_pages)			
 			print '\n\n\n*****************************\n\n\n',i+1,'th thread - ',len(above_in_links_limit_pages),' pages to (re)check', ' over potentially ', len(pages.keys()) , ' total pages\n\n\n*****************************\n\n\n',
-			print 'above_in_links_limit_pages',len(above_in_links_limit_pages)
+			print 'above_in_links_limit_pages',N
+			
+			
 			#pool_size = int(multiprocessing.cpu_count())
 			#pool_size = max(1,min(30*pool_size,len(above_in_links_limit_pages)))
 			#pool_size=1#DEBUG MODE
-			package =[]
-			for page in above_in_links_limit_pages:
-				package.append((page,query))
 			#print 'package',package
-			data_extracted=pool.map(extract_data, package)
-			if len(data_extracted)>0:
-				for webpage in data_extracted:
-					pages[webpage.url]=-9999999999#page visited even if there is a redirection...
-					if not webpage.url_redirected==None:
-						equivalent[webpage.url]=webpage.url_redirected
-				print 'data_extracted length',len(data_extracted)
-				processed_pages = pool.map(extract_links,data_extracted) #extract_links returns: (page,soup,html,link_total)
-				print 'total processed_pages = ',len(processed_pages)
-				for processed_page in processed_pages:
-					current_webpage=processed_page
-					pages[current_webpage.url]=-9999999999#page visited
-					if not current_webpage.links=='link_total':
-						pagenumber+=1
-						#if pagenumber%20==0:
-						print pagenumber, 'th page recorded: ', current_webpage.url
-						self.addtoindex(current_webpage.url)
-						self.addtocorpus(current_webpage)
-						for link in current_webpage.links:
-							self.addlinkref(current_webpage.url,equivalent.get(link,link),'')				
-							pages[link]=pages.get(link,0)+1				 				
-						self.dbcommit()
-			else:
-				print 'no more websites to visit'
-				break
+			pool,pool_size=reinit_pool()
+			paquets=pool_size*20
+			for j in range(N/paquets + 1):
+
+				print "\n1#################processing packet, ",j,"over ",N/paquets, "eack stack has", paquets, " items\n"
+				package =[]
+				for page in above_in_links_limit_pages[j*paquets:(j+1)*paquets]:
+					package.append((page,query))
+			
+			
+			
+				pool,pool_size=reinit_pool()
+				data_extracted = ''
+			
+				data_extracted=pool.map(extract_data, package)
+				if len(data_extracted)>0: 
+					for webpage in data_extracted:
+						if webpage.successful_open:
+							pages[webpage.url]=-9999999999#page visited even if there is a redirection...
+							if not webpage.url_redirected==None:
+								equivalent[webpage.url]=webpage.url_redirected
+				
+					print 'data_extracted length',len(data_extracted)
+					pool,pool_size=reinit_pool()
+					processed_pages=''
+					processed_pages = pool.map(extract_links,data_extracted) #extract_links returns: (page,soup,html,link_total)
+					print 'total processed_pages = ',len(processed_pages)
+					for processed_page in processed_pages:
+						current_webpage=processed_page
+						if current_webpage.successful_open:
+							pages[current_webpage.url]=-9999999999#page visited
+						else:
+							pages[current_webpage.url]=pages[current_webpage.url]+100000#page visited
+						if not current_webpage.links=='link_total':
+							pagenumber+=1
+							#if pagenumber%20==0:
+							print pagenumber, 'th page recorded: ', current_webpage.url
+							self.addtoindex(current_webpage.url)
+							self.addtocorpus(current_webpage)
+							for link in current_webpage.links:
+								self.addlinkref(current_webpage.url,equivalent.get(link,link),'')				
+								pages[link]=pages.get(link,0)+1				 				
+							for link in current_webpage.links_whole:
+								self.addlinkref(current_webpage.url,equivalent.get(link,link),'')				
+								#pages[link]=pages.get(link,0)+1
+					self.dbcommit()
   
   # Create the database tables
 	def createindextables(self): 
 		self.con.execute('create table urllist(url text,url_redirect text ,url_views integer)')
 		self.con.execute('create table urlcorpus(urlid Integer,url text,text_summary text,html_summary text, html text,md5 text,title text,domain text,url_feed text,links text,charset text,date text )')
 		self.con.execute('create table link(fromid integer,toid integer)')
+		self.con.execute('create table link_whole(fromid integer,toid integer)')
 		self.con.execute('create index urlidx on urllist(url)')
 		self.con.execute('create index urltoidx on link(toid)')
 		self.con.execute('create index urlfromidx on link(fromid)')
