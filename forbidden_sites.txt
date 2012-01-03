@@ -1,6 +1,6 @@
 www.wikio.fr
-twitter.com/
-kelkoo.fr/
+twitter.com
+kelkoo.fr
 partner.googleadservices.com
 alvinet.com
 google.com
@@ -17,3 +17,5 @@ gstatic.com
 .mp3$
 .mp4$
 .ogg$
+dedalusweb
+diigo

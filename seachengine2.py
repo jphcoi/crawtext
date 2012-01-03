@@ -173,10 +173,10 @@ def extract_data(package):
 			html=url.download(user_agent=choice(user_agents),cached=False)
 			#html = urllib2.urlopen(page).read()
 		else:
-			print 'bad mimetype',mimetype,page
+			#print 'bad mimetype',mimetype,page
 			new_webpage.successful_open=True
 	except:
-		print "*** Could not open page: %s" % page
+		#print "*** Could not open page: %s" % page
 		new_webpage.successful_open=False
 	try:
 		if check_query(query,str(html)):#on s'assure d'abord que ça roule pour le full html
@@ -283,7 +283,8 @@ def extract_data(package):
 			new_webpage.successful_open=True
 			new_webpage.query_result=False
 	except:
-		print "*** Could not extract data from %s" % page
+		#print "*** Could not extract data from %s" % page
+		pass
 	return new_webpage
 
 
@@ -369,12 +370,12 @@ def extract_links(webpage):
 	return webpage
 	
 def reinit_pool():
-	try:
-		pool.close()
-	except:
-		pass
+#	try:
+#		pool.close()
+#	except:
+#		pass
 	pool_size = int(multiprocessing.cpu_count())
-	pool_size= 5*pool_size
+	pool_size= 10*pool_size
 	pool = multiprocessing.Pool(processes=pool_size)
 	return pool,pool_size
 
@@ -466,8 +467,12 @@ class crawler:
 			#pool_size = max(1,min(30*pool_size,len(above_in_links_limit_pages)))
 			#pool_size=1#DEBUG MODE
 			#print 'package',package
+			try:
+				pool.close()
+			except:
+				pass	
 			pool,pool_size=reinit_pool()
-			paquets=pool_size*20
+			paquets=pool_size*50
 			for j in range(N/paquets + 1):
 
 				print "\n1#################processing packet, ",j,"over ",N/paquets, "eack stack has", paquets, " items\n"
@@ -476,11 +481,11 @@ class crawler:
 					package.append((page,query))
 			
 			
-			
+				pool.close()
 				pool,pool_size=reinit_pool()
 				data_extracted = ''
 			
-				data_extracted=pool.map(extract_data, package)
+				data_extracted=pool.map(extract_data, package,chunksize=10)
 				if len(data_extracted)>0: 
 					for webpage in data_extracted:
 						if webpage.successful_open:
@@ -489,9 +494,10 @@ class crawler:
 								equivalent[webpage.url]=webpage.url_redirected
 				
 					print 'data_extracted length',len(data_extracted)
+					pool.close()
 					pool,pool_size=reinit_pool()
 					processed_pages=''
-					processed_pages = pool.map(extract_links,data_extracted) #extract_links returns: (page,soup,html,link_total)
+					processed_pages = pool.map(extract_links,data_extracted,chunksize=10) #extract_links returns: (page,soup,html,link_total)
 					print 'total processed_pages = ',len(processed_pages)
 					for processed_page in processed_pages:
 						current_webpage=processed_page
@@ -509,7 +515,7 @@ class crawler:
 								self.addlinkref(current_webpage.url,equivalent.get(link,link),'')				
 								pages[link]=pages.get(link,0)+1				 				
 							for link in current_webpage.links_whole:
-								self.addlinkref(current_webpage.url,equivalent.get(link,link),'')				
+								self.addlinkref_whole(current_webpage.url,equivalent.get(link,link),'')				
 								#pages[link]=pages.get(link,0)+1
 					self.dbcommit()
   
