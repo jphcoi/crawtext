@@ -9,8 +9,8 @@ from random import choice
 from library import *
 import multiprocessing
 import socket
-from lxml import html
-from lxml.html.clean import clean_html
+#from lxml import html
+#from lxml.html.clean import clean_html
 sys.path.append("decruft")
 import decruft
 import urllib2
