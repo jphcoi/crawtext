@@ -23,13 +23,14 @@ try:
 	user_parameters=sys.argv[1]
 except:
 	user_parameters='crawl_parameters.yml'
-parameters = yaml.load('\n'.join(open(user_parameters,'r').readlines()))				
+
+parameters = yaml.load('\n'.join(open(user_parameters,'r').readlines()))
 
 try:
 	path = parameters['path']
 except:
 	print 'invalid parameters file'
-	
+
 
 inlinks_min=parameters.get('inlinks_min',1)
 depth=parameters.get('depth',10)
