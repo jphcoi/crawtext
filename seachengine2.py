@@ -489,7 +489,7 @@ class crawler:
 				if len(data_extracted)>0: 
 					for webpage in data_extracted:
 						if webpage.successful_open:
-							pages[webpage.url]=-9999999999#page visited even if there is a redirection...
+							pages[webpage.url]=-99999#page visited even if there is a redirection...
 							if not webpage.url_redirected==None:
 								equivalent[webpage.url]=webpage.url_redirected
 				
@@ -502,9 +502,9 @@ class crawler:
 					for processed_page in processed_pages:
 						current_webpage=processed_page
 						if current_webpage.successful_open:
-							pages[current_webpage.url]=-9999999999#page visited
+							pages[current_webpage.url]=-99999#page visited
 						else:
-							pages[current_webpage.url]=pages[current_webpage.url]+100000#page visited
+							pages[current_webpage.url]=pages.get(current_webpage.url,0)+10000#page visited
 						if not current_webpage.links=='link_total':
 							pagenumber+=1
 							#if pagenumber%20==0:

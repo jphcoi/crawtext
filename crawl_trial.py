@@ -35,7 +35,7 @@ except:
 inlinks_min=parameters.get('inlinks_min',1)
 depth=parameters.get('depth',10)
 query=parameters.get('query','You really should enter a query, otherwise...')
-
+print 'query',query
 #crawler parameters
  
 #path = 'data/algsang'
@@ -58,7 +58,7 @@ for fname in dirList:
 
 print 'pages init',len(pages)
 print 'pages',pages
-query='algues vertes AND sangliers'
+#query='algues vertes AND sangliers'
 #query='biofuel'
 try:
 	os.mkdir('ouput')
