@@ -1,6 +1,4 @@
-{
-path: 'data/alg',
-inlinks_min: 3,
-depth: 20,
-query: 'algues vertes',
-}
+path: 'data/alg'
+inlinks_min: 3
+depth: 20
+query: 'algues vertes'

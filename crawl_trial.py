@@ -23,7 +23,8 @@ try:
 	user_parameters=sys.argv[1]
 except:
 	user_parameters='crawl_parameters.yml'
-parameters = yaml.load('\n'.join(open(user_parameters,'r').readlines()))				
+
+parameters = yaml.load('\n'.join(open(user_parameters,'r').readlines()))
 
 try:
 	path = parameters['path']
