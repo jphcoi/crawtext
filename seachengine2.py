@@ -375,7 +375,7 @@ def reinit_pool():
 #	except:
 #		pass
 	pool_size = int(multiprocessing.cpu_count())
-	pool_size= 10*pool_size
+	pool_size = 10*pool_size
 	pool = multiprocessing.Pool(processes=pool_size)
 	return pool,pool_size
 
@@ -475,7 +475,7 @@ class crawler:
 			paquets=pool_size*50
 			for j in range(N/paquets + 1):
 
-				print "\n1#################processing packet, ",j,"over ",N/paquets, "eack stack has", paquets, " items\n"
+				print "\n1#################processing packet, ",j,"over ",N/paquets, "each stack has", paquets, " items\n"
 				package =[]
 				for page in above_in_links_limit_pages[j*paquets:(j+1)*paquets]:
 					package.append((page,query))
