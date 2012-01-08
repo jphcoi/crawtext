@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import sys
+import sqlite3
 reload(sys) 
 sys.setdefaultencoding("utf-8")
+sys.path.append("../pylibrary")
+#sys.path.append("../pylibrary")
+sys.path.append('/Users/jean-philippecointet/Desktop/cortext/manager/scripts/pylibrary')
+
+
+import fonctions
 
 """
 library.py
@@ -11,7 +18,6 @@ Created by Jean-Philippe Cointet on 2011-12-28.
 Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 """
 
-import sys
 import os
 import re
 forbidden_sites=map(lambda x: x[:-1],open('forbidden_sites.txt','r').readlines())
@@ -69,18 +75,111 @@ def url_uniformer(url):
 		url = 'http://' + url
 	url = url.split('#')[0]#get rid of js parameters
 	return url
+
+
+def extracturls_corpus(con):
+	cur=con.execute("select urlid,domain from urlcorpus ")
+	res=cur.fetchall()
+	pages = {}
+	for result in res:
+		pages[result[0]]=result[1]
+	return pages
+	
+def extractlinks(con,urls_corpus):
+	cur=con.execute("select fromid,toid from link ")
+	links=cur.fetchall()
+	num_links=0
+	link_list={}
+	for link in links:
+		(fromid,toid)=link
+		if fromid!=toid:
+			if fromid in urls_corpus and toid in urls_corpus:
+				link_list.setdefault(fromid,[]).append(toid)
+				num_links+=1
+	print len(link_list),'total unique links'
+	return link_list
+
+
+def extractdata(con):
+	fields =con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+	cur=con.execute("SELECT * FROM  urlcorpus")
+	print cur.description
+	fields = [tuple[0] for tuple in cur.description]
+	print fields
+	questions=','.join(['?'] * (len(fields)))
+	fields_txt=','.join(fields)
+	#print "select  "+questions +" from urlcorpus ",fields
+	#cur=con.execute("select  "+questions +" from urlcorpus ",fields)
+	cur=con.execute("select  "+fields_txt +" from urlcorpus ")
+	res=cur.fetchall()
+	pages = {}
+	salient_fields=[ 'url', 'text_summary','title', 'domain', 'date_date']
+	names={}
+	names['url']='ISIT9'
+	names['domain']='ISIJOURNAL'
+	names['title']='ISItitle'
+	names['text_summary']='ISIabstract'
+	
+	notices={}
+	for result in res:
+		id=result[0]
+		notice={}
+		for field,y in zip(fields,result):
+			if field in salient_fields:
+				notice[names.get(field,field)]=[[y]]
+		notice['ISIpubdate']=[['1']]
+		notices[id]=notice
+	return notices			
 	
 
-class webpage:
-	url=None
-	url_redirected=None
-	html=None
-	html_summary=None
-	text_summary=None
-	domain=None
-	query_result=None
-	url_feed=None
-	path=None
-	links=None
-	charset=None
-	title=None
+def exportcrawl2resolu(db_crawl,query,result_path):
+	db_resolu=db_crawl[:-9]+'solved.db'
+	print 'db_resolu',db_resolu
+	print 'db_crawl',db_crawl
+	con_crawl=sqlite3.connect(db_crawl)
+	con_resolu=sqlite3.connect(db_resolu)
+	
+	urls_corpus=extracturls_corpus(con_crawl)
+	dict_links=extractlinks(con_crawl,urls_corpus)
+	
+	notices =extractdata(con_crawl)
+	
+	for notice_id,notice in notices.iteritems():
+		if notice_id in dict_links:
+			print dict_links[notice_id]
+			notices[notice_id]['ISICitedRef']=map(lambda x: notices[x]['ISIT9'][0],dict_links[notice_id])
+			notices[notice_id]['ISICRJourn']=map(lambda x: notices[x]['ISIJOURNAL'][0],dict_links[notice_id])
+	#print notices
+	build_se=True
+	
+	dico_tag={}
+	dico_tag['url']='ISIT9'
+	dico_tag['domain']='ISIJOURNAL'
+	dico_tag['title']='ISITITLE'
+	dico_tag['text_summary']='ISIABSTRACT'
+	
+	nb_notice_afficher=10
+	mapping_complet = fonctions.afficher_notices(notices,dico_tag,nb_notice_afficher)
+	
+	if build_se==True and len(notices.keys())>0:
+			#sys.path.append("../parser_science")
+			sys.path.append('/Users/jean-philippecointet/Desktop/cortext/manager/scripts/parser_science')
+		
+			import whoosh_init
+			print 'SE built there:',result_path
+			# if corpus_type=='factiva':
+			# 				tags = ['accessionNo','reference','baseLanguage','byline','copyright','sourceName','wordCount','headline','leadParagraph','tailParagraphs','pages','publicationDate','region','newsSubject','company','industry']
+			# 				mapping_complet={}
+			# 				for tag in tags:
+			# 					mapping_complet[tag]=tag
+			# 					
+			# 			elif corpus_type=='xmlpubmed':
+			# 				tags = ['PMID','PubDate','DateCreated','DateCompleted','ISSN','Volume','Issue','ArticleTitle','Title','Author','ISOAbbreviation','ArticleTitle','MedlinePgn','Language','PublicationType','Grant','MedlineJournalInfo','ISSNLinking','Chemical','NameOfSubstance',\
+			# 	'CitationSubset','RefSource','MeshHeading','Abstract','Affiliation','CommentsCorrections',	'Author_name','Author_firstname','MeshHeading_Description','ISIpubdate','PMID','Journal']
+			# 				mapping_complet={}
+			# 				for tag in tags:
+			# 					mapping_complet[tag]=tag
+			# 			
+			ix=whoosh_init.instantiate(result_path,mapping_complet,'isi',True,query)
+			whoosh_init.seed_se(ix,notices,'isi')
+	fonctions.insert_notices(db_resolu,True,notices,dico_tag,mapping_complet,corpus_name=query,output_type='reseaulu')

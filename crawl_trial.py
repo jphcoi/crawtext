@@ -35,6 +35,7 @@ except:
 inlinks_min=parameters.get('inlinks_min',1)
 depth=parameters.get('depth',10)
 query=parameters.get('query','You really should enter a query, otherwise...')
+result_path=parameters.get('result_path','ouput')
 print 'query',query
 #crawler parameters
  
@@ -58,19 +59,22 @@ for fname in dirList:
 
 print 'pages init',len(pages)
 print 'pages',pages
-#query='algues vertes AND sangliers'
-#query='biofuel'
-try:
-	os.mkdir('ouput')
-	os.remove('ouput/'+query+'_crawl.db')
-	print 'deleted','ouput/'+query+'_crawl.db'
-except:
-	pass
-	
-crawler=seachengine2.crawler('ouput/'+query+'_crawl.db')
-try:
-  crawler.createindextables()
-except:
-  print "tables already exist, good"
 
-crawler.crawl(pages,query=query,inlinks=inlinks_min,depth=depth)
+db_name=os.path.join(result_path,query+'_crawl.db')
+
+
+# # try:	
+# # 	os.mkdir(result_path)
+# # 	os.remove(os.path.join(result_path,query+'_crawl.db'))
+# # 	print 'deleted',result_path+query+'_crawl.db'
+# # except:
+# # 	pass
+
+# # crawler=seachengine2.crawler(db_name)
+# # try:
+# #   crawler.createindextables()
+# # except:
+# #   print "tables already exist, good"
+# 
+# crawler.crawl(pages,query=query,inlinks=inlinks_min,depth=depth)
+exportcrawl2resolu(db_name,query,result_path)

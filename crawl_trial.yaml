@@ -1,0 +1,80 @@
+######## example_param.init ######################################
+##
+############## Description du script lui-même pour l'utilisateur de ctManager, ainsi que les formats d'entrée/sorties ############################
+##
+
+script:
+  name: crawl_trial
+  desc: "Launch a crawl on the www"
+  type: data collection
+  author: jp cointet
+  tags: [crawl, web]
+  inputs:
+   -
+      type: text
+      categ: records
+      structure: isi	
+  outputs:
+    -
+      type: sqlite
+      categ: biblio
+      structure: reseaulu
+
+##
+############## Paramètres du scripts (construction du formulaire utilisateur et variables renvoyées aux script) ############
+##
+
+params:
+  # corpus_type:
+  #    label: Corpus type
+  #    type:
+  #      widget: list
+  #      multiple: no
+  #    choices: ['isi','csv']#, 'pubmed', 'text','scopus']
+  #    default: isi
+  # year_fiel:
+  #   label: 'If your csv file include a year entry, please indicate the column name' 
+  #   type: string
+  #   default: ""
+  # corpus_origin_file:
+  #    type: string
+  #    default: ""
+  # output_type:
+  #   label: Output Format
+  #   type:
+  #     widget: list
+  #     multiple: no
+  #   choices: ['reseaulu']#, 'classique']
+  #   default: reseaulu
+  # reinit_db:
+  #   label: Build a new database or update a previous one ?
+  #   type:
+  #     widget: list
+  #     multiple: no
+  #   choices: ['yes','no']
+  #   default: 'yes'
+  # project_name:
+  #   type: string
+  #   default: ""
+  project_path:
+    type: string
+    default: ""
+  inlinks_min:
+    label: 'Minimum number of incoming links to consider a webpage'
+    type: string
+    default: '2'
+  depth:
+    label: 'Maximum number of corpus extension steps'    
+    type: string
+    default: '5'
+  query:
+    label: 'Enter your query (boolean operator like "AND" is allowed)'    
+    type: string
+    default: 'You really should enter a query, otherwise...'
+#  result_path:
+
+    # inlinks_min=parameters.get('inlinks_min',1)
+    #  depth=parameters.get('depth',10)
+    #  query=parameters.get('query','You really should enter a query, otherwise...')
+    #  result_path=parameters.get('result_path','ouput')
+ 

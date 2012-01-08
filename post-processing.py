@@ -3,6 +3,7 @@
 import os, sys
 import sqlite3
 query='algues vertes AND sangliers'
+query='bipolaire'
 #query='biofuel'
 
 crawler=con=sqlite3.connect('ouput/'+query+'_crawl.db')
