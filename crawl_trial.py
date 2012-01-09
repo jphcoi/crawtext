@@ -97,18 +97,18 @@ print 'pages',pages
 db_name=os.path.join(result_path,query+'_crawl.db')
 
 
-# # try:	
-# # 	os.mkdir(result_path)
-# # 	os.remove(os.path.join(result_path,query+'_crawl.db'))
-# # 	print 'deleted',result_path+query+'_crawl.db'
-# # except:
-# # 	pass
+try:	
+	os.mkdir(result_path)
+	os.remove(os.path.join(result_path,query+'_crawl.db'))
+	print 'deleted',result_path+query+'_crawl.db'
+except:
+	pass
 
-# # crawler=seachengine2.crawler(db_name)
-# # try:
-# #   crawler.createindextables()
-# # except:
-# #   print "tables already exist, good"
-# 
-# crawler.crawl(pages,query=query,inlinks=inlinks_min,depth=depth)
+crawler=seachengine2.crawler(db_name)
+try:
+  crawler.createindextables()
+except:
+  print "tables already exist, good"
+
+crawler.crawl(pages,query=query,inlinks=inlinks_min,depth=depth)
 exportcrawl2resolu(db_name,query,result_path)
