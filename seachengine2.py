@@ -456,7 +456,7 @@ class crawler:
 			for page,views in pages.iteritems():
 				pages_clean[equivalent.get(page,page)]=views
 			pages=pages_clean
-			
+			print 'pages',pages
 			above_in_links_limit_pages=[x for x in pages if pages[x]>=inlinks and pages[x]<=50000]#on essaye de rouvrir la page 5 fois avant d'abandonner 
 			N=len(above_in_links_limit_pages)			
 			print '\n\n\n*****************************\n\n\n',i+1,'th thread - ',len(above_in_links_limit_pages),' pages to (re)check', ' over potentially ', len(pages.keys()) , ' total pages\n\n\n*****************************\n\n\n',
