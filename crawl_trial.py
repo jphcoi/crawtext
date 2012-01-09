@@ -30,9 +30,9 @@ try:
 	path = parameters['path']
 except:
 	print 'invalid parameters file'
-
-if path=='':
 	path=parameters['corpus_file']
+
+	
 	
 print 'path',path
 inlinks_min=parameters.get('inlinks_min',1)
