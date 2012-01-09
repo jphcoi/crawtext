@@ -32,13 +32,6 @@ except:
 	print 'invalid parameters file'
 	path=parameters['corpus_file']
 
-if path[-4:]=='.zip':
-		print 'on dezip' + path
-		corpus_out = '/'.join(path.split('/')[:-1]) + '/'+query
-		print corpus_out
-		unzip_file_into_dir(corpus_file,corpus_out)
-		path=corpus_out
-
 	
 print 'path',path
 inlinks_min=parameters.get('inlinks_min',1)
@@ -46,6 +39,15 @@ depth=parameters.get('depth',10)
 query=parameters.get('query','You really should enter a query, otherwise...')
 result_path=parameters.get('result_path','ouput')
 print 'query',query
+
+if path[-4:]=='.zip':
+		print 'on dezip' + path
+		corpus_out = '/'.join(path.split('/')[:-1]) + '/'+query
+		print corpus_out
+		unzip_file_into_dir(corpus_file,corpus_out)
+		path=corpus_out
+
+
 #crawler parameters
  
 #path = 'data/algsang'
