@@ -31,7 +31,7 @@ try:
 except:
 	print 'invalid parameters file'
 	path=parameters['corpus_file']
-
+print 'path',path
 inlinks_min=parameters.get('inlinks_min',1)
 depth=parameters.get('depth',10)
 query=parameters.get('query','You really should enter a query, otherwise...')

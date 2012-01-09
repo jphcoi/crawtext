@@ -56,9 +56,6 @@ params:
   # project_name:
   #   type: string
   #   default: ""
-  project_path:
-    type: string
-    default: ""
   inlinks_min:
     label: 'Minimum number of incoming links to consider a webpage'
     type: string
