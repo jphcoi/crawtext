@@ -163,7 +163,14 @@ def exportcrawl2resolu(db_crawl,query,result_path):
 	
 	if build_se==True and len(notices.keys())>0:
 			#sys.path.append("../parser_science")
-			sys.path.append('/Users/jean-philippecointet/Desktop/cortext/manager/scripts/parser_science')
+			try:
+				sys.path.append('../parser_science')
+			except:
+				pass
+			try:
+				sys.path.append('../../parser_science')
+			except:
+				pass
 		
 			import whoosh_init
 			print 'SE built there:',result_path
