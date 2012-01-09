@@ -25,7 +25,7 @@ except:
 	user_parameters='crawl_parameters.yml'
 
 parameters = yaml.load('\n'.join(open(user_parameters,'r').readlines()))
-
+print 'parameters',parameters
 try:
 	path = parameters['path']
 except:
