@@ -80,15 +80,17 @@ dirList=os.listdir(path)
 for fname in dirList:
 	pagelist =os.path.join(path,fname)
 	print 'pagelist',pagelist
-	url=web.URL(pagelist)
-	chaine=url.download(cached=False)
-	new_urls = map(lambda x: url_uniformer(x.split('">')[0]),web.find_urls(chaine, unique=True))
-	if 'Google Search' in pagelist:
-		 new_urls = map(lambda x:x.split("&amp;")[0],new_urls)
-	for new_url in new_urls[:]:
-		if not check_forbidden((new_url,'')) and not new_url in pages:
-			pages[new_url]=inlinks_min
-
+	try:
+		url=web.URL(pagelist)
+		chaine=url.download(cached=False)
+		new_urls = map(lambda x: url_uniformer(x.split('">')[0]),web.find_urls(chaine, unique=True))
+		if 'Google Search' in pagelist:
+			 new_urls = map(lambda x:x.split("&amp;")[0],new_urls)
+		for new_url in new_urls[:]:
+			if not check_forbidden((new_url,'')) and not new_url in pages:
+				pages[new_url]=inlinks_min
+	except:
+		pass
 print 'pages init',len(pages)
 print 'pages',pages
 
