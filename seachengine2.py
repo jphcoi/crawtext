@@ -14,7 +14,7 @@ import socket
 sys.path.append("decruft")
 import decruft
 import urllib2
-import feedparser
+#import feedparser
 import pattern
 from  pattern import web
 from BeautifulSoup import BeautifulSoup as parser
