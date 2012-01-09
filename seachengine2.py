@@ -332,7 +332,7 @@ def extract_links(webpage):
 	#(page,html,querycheck,rssfeed_url,text,redirected_page,html_summary,domain,webpage)=data
 	citations=[]
 	citations_whole=[]
-	linktxtfile=open('linktext','a')
+	#linktxtfile=open('linktext','a')
 	page_old=webpage.url
 	if not webpage.url_redirected==None: 
 		webpage.url=webpage.url_redirected
@@ -343,7 +343,7 @@ def extract_links(webpage):
 		for linke in links:#in find_url(page,html):#web.find_urls(text, unique=True):
 			if not check_forbidden(linke):
 					link,linkText=linke
-					linktxtfile.write(linkText+'\n')
+					#linktxtfile.write(linkText+'\n')
 					if not link[0:4]=='http':
 						link = 'http//'+link
 					else:
@@ -351,7 +351,7 @@ def extract_links(webpage):
 		for linke in links_whole:#in find_url(page,html):#web.find_urls(text, unique=True):
 			if not check_forbidden(linke):
 					link,linkText=linke
-					linktxtfile.write(linkText+'\n')
+					#linktxtfile.write(linkText+'\n')
 					if not link[0:4]=='http':
 						link = 'http//'+link
 					else:
