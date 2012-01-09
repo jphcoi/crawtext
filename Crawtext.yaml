@@ -71,7 +71,10 @@ params:
     label: 'Enter your query (boolean operator like "AND" is allowed)'    
     type: string
     default: 'You really should enter a query, otherwise...'
-  path:
+  project_name:
+    type: string
+    default: ""
+  project_path:
     type: string
     default: ""
 
