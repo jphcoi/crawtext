@@ -374,11 +374,9 @@ def reinit_pool():
 #		pool.close()
 #	except:
 #		pass
-	# pool_size = int(multiprocessing.cpu_count())
-	# pool_size = 1*pool_size
-	# pool = multiprocessing.Pool(processes=pool_size)
-	pool=''
-	pool_size=1
+	pool_size = int(multiprocessing.cpu_count())
+	pool_size = 5*pool_size
+	pool = multiprocessing.Pool(processes=pool_size)
 	return pool,pool_size
 
 
@@ -483,11 +481,11 @@ class crawler:
 					package.append((page,query))
 			
 			
-				#pool.close()
+				pool.close()
 				pool,pool_size=reinit_pool()
 				data_extracted = ''
 			
-				data_extracted=map(extract_data, package)#,chunksize=10)
+				data_extracted=pool.map(extract_data, package,chunksize=10)
 				if len(data_extracted)>0: 
 					for webpage in data_extracted:
 						if webpage.successful_open:
@@ -496,10 +494,10 @@ class crawler:
 								equivalent[webpage.url]=webpage.url_redirected
 				
 					print 'data_extracted length',len(data_extracted)
-					#pool.close()
+					pool.close()
 					pool,pool_size=reinit_pool()
 					processed_pages=''
-					processed_pages = map(extract_links,data_extracted)#,chunksize=10) #extract_links returns: (page,soup,html,link_total)
+					processed_pages = pool.map(extract_links,data_extracted,chunksize=10) #extract_links returns: (page,soup,html,link_total)
 					print 'total processed_pages = ',len(processed_pages)
 					for processed_page in processed_pages:
 						current_webpage=processed_page
