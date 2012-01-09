@@ -68,7 +68,7 @@ if path[-4:]=='.zip':
 		unzip_file_into_dir(path,corpus_out)
 		path=corpus_out
 
-
+print 'path',path
 #crawler parameters
  
 #path = 'data/algsang'
