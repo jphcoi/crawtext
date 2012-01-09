@@ -375,7 +375,7 @@ def reinit_pool():
 #	except:
 #		pass
 	pool_size = int(multiprocessing.cpu_count())
-	pool_size = 5*pool_size
+	pool_size = 1*pool_size
 	pool = multiprocessing.Pool(processes=pool_size)
 	return pool,pool_size
 
