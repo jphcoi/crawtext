@@ -40,6 +40,27 @@ query=parameters.get('query','You really should enter a query, otherwise...')
 result_path=parameters.get('result_path','ouput')
 print 'query',query
 
+
+
+import sys, zipfile, os, os.path
+
+def unzip_file_into_dir(file, dir):
+	try:
+		os.mkdir(dir, 0777)
+	except:
+		pass
+	zfobj = zipfile.ZipFile(file)
+	for name in zfobj.namelist():
+		if name.endswith('/'):
+			try:
+				os.mkdir(os.path.join(dir, name))
+			except:
+				pass
+		else:
+			outfile = open(os.path.join(dir, name), 'wb')
+			outfile.write(zfobj.read(name))
+			outfile.close()
+
 if path[-4:]=='.zip':
 		print 'on dezip' + path
 		corpus_out = '/'.join(path.split('/')[:-1]) + '/'+query
