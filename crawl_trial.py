@@ -39,7 +39,7 @@ depth=int(parameters.get('depth',10))
 query=parameters.get('query','You really should enter a query, otherwise...')
 result_path=parameters.get('result_path','ouput')
 print 'query',query
-
+max_pages_number=int(parameters.get('max_pages_number',10000))
 
 
 import sys, zipfile, os, os.path
@@ -110,5 +110,5 @@ try:
 except:
   print "tables already exist, good"
 
-crawler.crawl(pages,query=query,inlinks=inlinks_min,depth=depth)
+crawler.crawl(pages,query=query,inlinks=inlinks_min,depth=depth,max_pages_number=max_pages_number)
 exportcrawl2resolu(db_name,query,result_path)

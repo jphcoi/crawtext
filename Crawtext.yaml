@@ -74,7 +74,10 @@ params:
   project_path:
     type: string
     default: ""
-
+  max_pages_number:
+    label: 'Enter the max number of pages to visit (caution: the corpus may be far smaller than this number)'
+    type: string
+    default: '10000'
 #  result_path:
 
     # inlinks_min=parameters.get('inlinks_min',1)

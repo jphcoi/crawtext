@@ -148,6 +148,7 @@ def exportcrawl2resolu(db_crawl,query,result_path):
 		if notice_id in dict_links:
 			print dict_links[notice_id]
 			notices[notice_id]['ISICitedRef']=map(lambda x: notices[x]['ISIT9'][0],dict_links[notice_id])
+			notices[notice_id]['ISIRef']=map(lambda x: notices[x]['ISIT9'][0],[notice_id])
 			notices[notice_id]['ISICRJourn']=map(lambda x: notices[x]['ISIJOURNAL'][0],dict_links[notice_id])
 	#print notices
 	build_se=True
@@ -165,6 +166,10 @@ def exportcrawl2resolu(db_crawl,query,result_path):
 			#sys.path.append("../parser_science")
 			try:
 				sys.path.append('../parser_science')
+			except:
+				pass
+			try:
+				sys.path.append('/Users/jean-philippecointet/Desktop/cortext/manager/scripts/parser_science')
 			except:
 				pass
 			try:

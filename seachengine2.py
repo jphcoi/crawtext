@@ -444,7 +444,7 @@ class crawler:
 		linkid=cur.lastrowid
 
 
-	def crawl(self,pages,query='',inlinks=1,depth=10):	
+	def crawl(self,pages,query='',inlinks=1,depth=10,max_pages_number=10000000000000000):	
 		
 		equivalent={}
 		
@@ -457,6 +457,9 @@ class crawler:
 				pages_clean[equivalent.get(page,page)]=views
 			pages=pages_clean
 			print 'pages',pages
+			if len(pages)>max_pages_number:
+				print 'stop it now!!!!'
+				break
 			above_in_links_limit_pages=[x for x in pages if pages[x]>=inlinks and pages[x]<=50000]#on essaye de rouvrir la page 5 fois avant d'abandonner 
 			N=len(above_in_links_limit_pages)			
 			print '\n\n\n*****************************\n\n\n',i+1,'th thread - ',len(above_in_links_limit_pages),' pages to (re)check', ' over potentially ', len(pages.keys()) , ' total pages\n\n\n*****************************\n\n\n',
