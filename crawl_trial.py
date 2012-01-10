@@ -40,7 +40,10 @@ query=parameters.get('query','You really should enter a query, otherwise...')
 result_path=parameters.get('result_path','ouput')
 print 'query',query
 max_pages_number=int(parameters.get('max_pages_number',10000))
-
+if max_pages_number == 999999:
+	pass
+else:
+	max_pages_number=max(max_pages_number,100000)
 
 import sys, zipfile, os, os.path
 
