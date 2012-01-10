@@ -18,3 +18,4 @@ TODO list:
   * modular architecture : include a better information extraction process.
   * avoid downloading n times the same content. (md5 comparison)
   * retry to download pages that could not be opened.
+  * targeted and careful crawl of each domain (only follow hypertext links with the ~query in the url or in the linkText)
