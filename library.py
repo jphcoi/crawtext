@@ -105,7 +105,7 @@ def extractdata(con):
 	cur=con.execute("SELECT * FROM  urlcorpus")
 	print cur.description
 	fields = [tuple[0] for tuple in cur.description]
-	print fields
+	#print fields
 	questions=','.join(['?'] * (len(fields)))
 	fields_txt=','.join(fields)
 	#print "select  "+questions +" from urlcorpus ",fields
