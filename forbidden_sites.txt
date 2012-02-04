@@ -17,3 +17,5 @@ gstatic.com
 dedalusweb
 diigo
 microsofttranslator
+webcache.googleusercontent.com
+googleusercontent

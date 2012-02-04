@@ -378,7 +378,7 @@ def reinit_pool():
 #	except:
 #		pass
 	pool_size = int(multiprocessing.cpu_count())
-	pool_size = 5*pool_size
+	pool_size = 3*pool_size
 	pool = multiprocessing.Pool(processes=pool_size)
 	return pool,pool_size
 
@@ -481,7 +481,7 @@ class crawler:
 			except:
 				pass	
 			pool,pool_size=reinit_pool()
-			paquets=pool_size*50
+			paquets=pool_size*20
 			for j in range(N/paquets + 1):
 
 				print "\n1#################processing packet, ",j,"over ",N/paquets, "each stack has", paquets, " items\n"
