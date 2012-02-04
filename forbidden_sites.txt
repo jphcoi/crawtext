@@ -1,10 +1,7 @@
 www.wikio.fr
-twitter.com
 kelkoo.fr
 partner.googleadservices.com
 alvinet.com
-google.com
-google.fr
 http://fr.wordpress.com
 googleusercontent.com
 accounts.google.com
@@ -19,3 +16,4 @@ gstatic.com
 .ogg$
 dedalusweb
 diigo
+microsofttranslator

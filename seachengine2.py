@@ -141,6 +141,7 @@ class Webpage:
 	url_redirected=None
 	mimetype=None
 	links_whole=None
+	text_html=''
 	def display_page(self):
 		
 		#print 'page url: ',self.url
@@ -258,8 +259,10 @@ def extract_data(package):
 					new_webpage.date='-'.join(date)
 			#date_txt=pattern_date_fr.search("Samedi 6 août 2011606/08/Août/201120:29")
 			if query_result:
-				print 'page: ', new_webpage.url,' with title: ', title,' and date',new_webpage.date ,'was assessed as ',query_result
-		
+				try:
+					print 'page: ', new_webpage.url,' with title: ', title,' and date',new_webpage.date ,'was assessed as ',query_result
+				except:
+					pass
 			#print 'date_txt'
 			#print 'date_txt:',str(date_txt)
 			#feed webpage details with informations
@@ -275,7 +278,7 @@ def extract_data(package):
 			new_webpage.title=title
 			new_webpage.opened=new_webpage.opened+1
 			new_webpage.md5=hashlib.sha224(text_summary).hexdigest()
-		
+			new_webpage.text_html=web.plaintext(html, keep=[], replace=web.blocks, linebreaks=2, indentation=False)
 			#new_webpage.display_page()
 			#new_webpage.links=None
 		else:
@@ -339,7 +342,7 @@ def extract_links(webpage):
 	if webpage.query_result:
 		#links=unique(web.find_urls(html_summary, unique=True))
 		links=unique(find_url(webpage.domain,webpage.url,webpage.html_summary,only_out=False))#on chercher les liens uniquement dans le contenu pertinent
-		links_whole=unique(find_url(webpage.domain,webpage.url,webpage.html,only_out=False))#on chercher les liens uniquement dans le contenu pertinent
+		links_whole=unique(find_url(webpage.domain,webpage.url,webpage.html,only_out=False))#on chercher les liens dans l'ensemble de la page
 		for linke in links:#in find_url(page,html):#web.find_urls(text, unique=True):
 			if not check_forbidden(linke):
 					link,linkText=linke
@@ -411,7 +414,7 @@ class crawler:
 		if 1:
 	  		try:
 				#self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,md5,title,domain,url_feed,links,charset) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset))
-				self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,md5,title,domain,url_feed,links,charset,date) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset,webpage.date))
+				self.con.execute("insert into urlcorpus(urlid,url,text_summary,html_summary,html,text_html,md5,title,domain,url_feed,links,charset,date) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (urlid,unicode(webpage.url),unicode(webpage.text_summary).replace("'","''"),unicode(webpage.html_summary).replace("'","''"),unicode(webpage.html).replace("'","''"),unicode(webpage.text_html).replace("'","''"),webpage.md5,unicode(webpage.title).replace("'","''"),webpage.domain,webpage.url_feed,'*#*'.join(webpage.links),webpage.charset,webpage.date))
 				#self.con.execute("insert into urlcorpus(urlid,html_summary) values ('%s','%s')" % (urlid,unicode(webpage.html_summary).replace("'","''")))
 			except:
 				print 'fail to execute',webpage.url
@@ -456,7 +459,10 @@ class crawler:
 			for page,views in pages.iteritems():
 				pages_clean[equivalent.get(page,page)]=views
 			pages=pages_clean
-			print 'pages',pages
+			try:
+				print 'pages',pages
+			except:
+				print 'unable to print page'
 			if len(pages)>max_pages_number:
 				print 'stop it now!!!!'
 				break
@@ -489,7 +495,7 @@ class crawler:
 				data_extracted = ''
 			
 				#data_extracted=pool.map(extract_data, package,chunksize=10)
-				data_extracted=map(extract_data, package)
+				data_extracted=pool.map(extract_data, package)
 				if len(data_extracted)>0: 
 					for webpage in data_extracted:
 						if webpage.successful_open:
@@ -527,7 +533,7 @@ class crawler:
   # Create the database tables
 	def createindextables(self): 
 		self.con.execute('create table urllist(url text,url_redirect text ,url_views integer)')
-		self.con.execute('create table urlcorpus(urlid Integer,url text,text_summary text,html_summary text, html text,md5 text,title text,domain text,url_feed text,links text,charset text,date text )')
+		self.con.execute('create table urlcorpus(urlid Integer,url text,text_summary text,html_summary text, html text,text_html text,md5 text,title text,domain text,url_feed text,links text,charset text,date text )')
 		self.con.execute('create table link(fromid integer,toid integer)')
 		self.con.execute('create table link_whole(fromid integer,toid integer)')
 		self.con.execute('create index urlidx on urllist(url)')

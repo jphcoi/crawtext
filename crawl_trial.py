@@ -73,14 +73,13 @@ if path[-4:]=='.zip':
 
 print 'path',path
 #crawler parameters
- 
 #path = 'data/algsang'
 #inlinks_min=1
 #depth=7
 
 
 dirList=os.listdir(path)
-for fname in dirList:
+for fname in dirList[:]:
 	pagelist =os.path.join(path,fname)
 	print 'pagelist',pagelist
 	try:

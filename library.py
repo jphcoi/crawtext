@@ -113,12 +113,13 @@ def extractdata(con):
 	cur=con.execute("select  "+fields_txt +" from urlcorpus ")
 	res=cur.fetchall()
 	pages = {}
-	salient_fields=[ 'url', 'text_summary','title', 'domain', 'date_date']
+	salient_fields=[ 'url', 'text_summary','text_html','title', 'domain', 'date_date']
 	names={}
 	names['url']='ISIT9'
 	names['domain']='ISIJOURNAL'
 	names['title']='ISItitle'
 	names['text_summary']='ISIabstract'
+	names['text_html']='FullText'
 	
 	notices={}
 	for result in res:
@@ -158,7 +159,8 @@ def exportcrawl2resolu(db_crawl,query,result_path):
 	dico_tag['domain']='ISIJOURNAL'
 	dico_tag['title']='ISITITLE'
 	dico_tag['text_summary']='ISIABSTRACT'
-	
+	dico_tag['text_html']='FullText'
+	print dico_tag
 	nb_notice_afficher=10
 	mapping_complet = fonctions.afficher_notices(notices,dico_tag,nb_notice_afficher)
 	
