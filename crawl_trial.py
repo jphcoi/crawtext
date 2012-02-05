@@ -79,7 +79,7 @@ print 'path',path
 
 
 dirList=os.listdir(path)
-for fname in dirList[:]:
+for fname in dirList[:1]:
 	pagelist =os.path.join(path,fname)
 	print 'pagelist',pagelist
 	try:
