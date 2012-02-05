@@ -459,10 +459,10 @@ class crawler:
 			for page,views in pages.iteritems():
 				pages_clean[equivalent.get(page,page)]=views
 			pages=pages_clean
-			try:
-				print 'pages',pages
-			except:
-				print 'unable to print page'
+			#try:
+				#print 'pages',pages
+			#except:
+				#print 'unable to print page'
 			if len(pages)>max_pages_number:
 				print 'stop it now!!!!'
 				break
